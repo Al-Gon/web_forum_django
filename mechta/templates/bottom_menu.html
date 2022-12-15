@@ -1,0 +1,10 @@
+<div class="col mb-3">
+    <h5>Меню сайта</h5>
+    <ul class="nav flex-column">
+    {% for title, url in menu_items %}
+        <li class="nav-item mb-2">
+            <a class="nav-link p-0 text-muted" href="{{ url }}">{{ title }}</a>
+        </li>
+    {% endfor %}
+    </ul>
+</div>

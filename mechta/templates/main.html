@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+{#head ____________________________________   #}
+
+<head>
+    <meta charset="UTF-8">
+
+    <title>{% block title %}{% endblock %}</title>
+
+    {% load static %}
+    <link href="{% static 'website/css/bootstrap.min.css' %}" rel="stylesheet" type="text/css">
+    <link href="{% static 'website/css/font-awesome/css/font-awesome.min.css' %}" rel="stylesheet">
+{#    <script src="{% static 'website/js/bootstrap.min.js'%}"></script>#}
+</head>
+<body>
+
+{#menu ____________________________________   #}
+
+{% include 'top_menu.html' %}
+
+{#breadcrumbs ____________________________________   #}
+
+{% if request.path != "/"  %}
+<div class="container mt-3 px-4 py-8">
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item">
+                <a href="{% url 'website:home' %}">Главная</a>
+            </li>
+            {% block second_page_link %}
+            {% endblock %}
+        </ol>
+    </nav>
+</div>
+{% endif %}
+
+
+{#content ____________________________________   #}
+
+    <div class="container my-4 px-4 py-8">
+
+        {% block content_title %}{% endblock %}
+
+        {% block content %}{% endblock %}
+
+    </div>
+
+{#footer ____________________________________   #}
+
+    <div class="container-fluid mb-0" style="background-color:#fffa90 ">
+        <footer class="row row-cols-1 row-cols-sm-2 row-cols-md-5 py-5 my-5 border-top">
+            <div class="col mb-3">
+                <a href="/" class="d-flex align-items-center mb-3 link-dark text-decoration-none">
+
+                </a>
+                <p class="text-muted">&copy: Все права защищены 2022.</p>
+            </div>
+
+            <div class="col mb-3">
+
+            </div>
+
+            {% include 'bottom_menu.html' %}
+
+            {% include 'last_messages.html' %}
+
+        </footer>
+    </div>
+
+</body>
+
+</html>

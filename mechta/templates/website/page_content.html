@@ -1,0 +1,28 @@
+{% extends "main.html" %}
+
+{% block title %} {{ page.title}} {% endblock %}
+
+{% block second_page_link %}
+    <li class="breadcrumb-item active" aria-current="page">
+        {{ page.title }}
+    </li>
+{% endblock %}
+
+{% block content_title %}
+    <h2 class="pb-2 border-bottom">
+        {{ page.title}}
+    </h2>
+{% endblock %}
+
+{% block content %}
+    <div class="row row-cols-2 g-8 py-8">
+        <div class="col-md-9 align-center">
+
+            {{ page.content }}
+
+        </div>
+        <div class="col-md-3 align-top">
+            {% include "right_column.html" %}
+        </div>
+    </div>
+{% endblock %}

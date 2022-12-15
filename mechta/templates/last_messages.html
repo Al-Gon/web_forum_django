@@ -1,0 +1,17 @@
+<div class="col mb-3">
+    <h5>Последние сообщения</h5>
+    <ul class="nav flex-column">
+    {% for message in last_messages|slice:":2" %}
+        <li class="nav-item mb-1 border-bottom">
+            <a class="nav-link p-0 text-muted"
+               href="{% url 'forum:topic' message.topic_id__section_id__id message.topic_id__id %}">
+                <h7><strong>{{ message.topic_id__title }}</strong></h7>
+            </a>
+            <p>
+                от {{ message.user_id__username }} (уч. {{ message.user_id__profile__land_plot }})<br>
+                {{ message.pub_date }}
+            </p>
+        </li>
+    {% endfor %}
+    </ul>
+</div>

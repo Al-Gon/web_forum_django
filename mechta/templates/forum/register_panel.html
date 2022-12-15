@@ -1,0 +1,25 @@
+<div class="container-fluid navbar-expand-lg navbar-light bg-light">
+    <div class="d-flex mb-2 mt-2">
+        <div class="me-auto p-2 nav-item">
+            <a class="nav-link active" aria-current="page" href="#">Новое на форуме</a>
+        </div>
+    {% if request.user.is_authenticated %}
+        <div class="nav-item p-2">
+            {{user.username}}
+        </div>
+        <div class="nav-item p-2">
+            <a class="nav-link" href="{% url 'forum:logout'%}">Выйти</a>
+        </div>
+    {% else %}
+        <div class="nav-item p-2">
+            <a class="nav-link" href="{% url 'forum:register' %}">Регистрация</a>
+        </div>
+        <div class="nav-item p-2">
+            <a class="nav-link" href="{% url 'forum:login' %}">Логин</a>
+        </div>
+    {% endif %}
+        <form action="{% url 'forum:search_results' %}" method="get" >
+            <input name="f_q" class="form-control" type="text" placeholder="Поиск по форуму" aria-label="Search">
+        </form>
+    </div>
+</div>
