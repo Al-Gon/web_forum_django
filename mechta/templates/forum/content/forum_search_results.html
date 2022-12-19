@@ -1,64 +1,111 @@
-{% extends "forum/forum_category_page.html" %}
+{% extends "main.html" %}
 
-{% block page_content %}
+{% block title %} Результаты поиска по форуму {% endblock %}
 
-{% if request.user.is_authenticated %}
-     <div class="row border-bottom">
-            <div class="d-flex col-12 text-muted pt-3">
-                Поиск " {{ query }} " по форуму - найдено {{ page.count }} результатов :
-            </div>
-     </div>
+{% block second_page_link %}
+    <li class="breadcrumb-item">
+        <a href="{% url 'forum:page' %}">Форум</a>
+    </li>
+    <li class="breadcrumb-item active" aria-current="page">
+        Результаты поиска по форуму
+    </li>
+{% endblock %}
 
-    {% if page %}
-        {% for item in page %}
 
-        <div class="row border-bottom">
-            <div class="d-flex col-12 text-muted pt-3">
-{#                <p class="pb-3 mb-0 small lh-sm">#}
-{#                    ...{{ item.topic_id__section_id__title }}...{{ item.topic_id__section_id__description }}...#}
-{#                </p>#}
-{#                <p class="pb-3 mb-0 small lh-sm">#}
-{#                    ...{{ item.topic_id__title }}...{{ item.topic_id__description }}...#}
-{#                </p>#}
-{#                <p class="pb-3 mb-0 small lh-sm">#}
-{#                    ...{{ item.text }}....#}
-{#                </p>#}
-                <a class="text-muted"
-                    href="
-                        {% if item.topic__id is None %}
-                            {% url 'forum:section' item.id %}
-                        {% else %}
-                            {% url 'forum:topic' item.id item.topic__id %}
+{% block content_title %}
+
+    <h2 class="pb-2 border-bottom">
+        Результаты поиска по форуму
+    </h2>
+
+{% endblock %}
+
+{% block content %}
+
+<div class="row row-cols-1  align-items-md-center g-8 py-8">
+
+    {% include "forum/register_panel.html" %}
+
+    <div class=" my-3 p-3 bg-body rounded shadow-sm">
+
+
+    {% if request.user.is_authenticated %}
+         <div class="row border-bottom">
+                <div class="d-flex col-12 text-muted pt-3">
+                    Поиск " {{ query }} " по форуму - найдено {{ page.count }} результатов :
+                </div>
+         </div>
+
+        {% if page %}
+            {% for item in page %}
+
+            <div class="row border-bottom">
+                <div class="d-flex col-12 text-muted pt-3">
+    {#                <p class="pb-3 mb-0 small lh-sm">#}
+    {#                    ...{{ item.topic_id__section_id__title }}...{{ item.topic_id__section_id__description }}...#}
+    {#                </p>#}
+    {#                <p class="pb-3 mb-0 small lh-sm">#}
+    {#                    ...{{ item.topic_id__title }}...{{ item.topic_id__description }}...#}
+    {#                </p>#}
+    {#                <p class="pb-3 mb-0 small lh-sm">#}
+    {#                    ...{{ item.text }}....#}
+    {#                </p>#}
+                    <a class="text-muted"
+                        href="
+                            {% if item.topic__id is None %}
+                                {% url 'forum:section' item.id %}
+                            {% else %}
+                                {% url 'forum:topic' item.id item.topic__id %}
+                            {% endif %}
+                            ">
+                        <p class="pb-3 mb-0 small lh-sm">
+                            {{ forloop.counter }}.
+                            ...{{ item.title|slice:":20"  }}...{{ item.description|slice:":20"  }}...
+                        {% if item.topic__title %}
+                                ...{{ item.topic__title|slice:":20"  }}...{{ item.topic__description|slice:":20" }}...
                         {% endif %}
-                        ">
+                        {% if item.topic__message__text %}
+                                ...{{ item.topic__message__text|slice:":30"  }}...
+                        {% endif %}
+                        </p>
+                    </a>
+
+                </div>
+            </div>
+            {% endfor %}
+        {% else %}
+            <div class="row border-bottom">
+                <div class="d-flex col-12 text-muted pt-3">
                     <p class="pb-3 mb-0 small lh-sm">
-                        {{ forloop.counter }}.
-                        ...{{ item.title|slice:":20"  }}...{{ item.description|slice:":20"  }}...
-                    {% if item.topic__title %}
-                            ...{{ item.topic__title|slice:":20"  }}...{{ item.topic__description|slice:":20" }}...
-                    {% endif %}
-                    {% if item.topic__message__text %}
-                            ...{{ item.topic__message__text|slice:":30"  }}...
-                    {% endif %}
+                        К сожалению на форуме ничего не найдено.<br>
                     </p>
-                </a>
-
+                </div>
             </div>
-        </div>
-        {% endfor %}
+        {% endif %}
+
     {% else %}
-        <div class="row border-bottom">
-            <div class="d-flex col-12 text-muted pt-3">
-                <p class="pb-3 mb-0 small lh-sm">
-                    К сожалению на форуме ничего не найдено.<br>
-                </p>
+        {% include "forum/suggestion_to_register.html" %}
+    {% endif %}
+        <div class="container-fluid navbar-expand-lg navbar-light bg-light rounded shadow-sm">
+            <div class="d-flex mb-2 mt-2">
+                <div class="p-2">
+                    <a class="nav-link" href="#">Новые сообщения</a>
+                </div>
+                <div class="p-2">
+                    <a class="nav-link" href="#">Ничего нового</a>
+                </div>
+                <div class="p-2">
+                    <a class="nav-link" href="#">Отметить все как прочитанные</a>
+                </div>
+                <div class="p-2">
+                    <a class="nav-link" href="#">Показать непрочитанные темы</a>
+                </div>
             </div>
         </div>
-    {% endif %}
 
-{% else %}
-    {% include "forum/suggestion_to_register.html" %}
-{% endif %}
+        {% include "forum/statistic_panel.html" %}
 
+    </div>
+</div>
 
 {% endblock %}

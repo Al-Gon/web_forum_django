@@ -1,6 +1,4 @@
 from django.views.generic import DetailView, ListView
-from view_breadcrumbs import DetailBreadcrumbMixin
-from django.utils.translation import gettext_lazy as _
 from mechta.apps.utils import DataMixin
 from .models import *
 
