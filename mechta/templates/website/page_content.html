@@ -15,13 +15,14 @@
 {% endblock %}
 
 {% block content %}
-    <div class="row row-cols-2 g-8 py-8">
-        <div class="col-md-9 align-center">
+    <div class="d-flex flex-row  row-cols-2 g-8 py-8">
+        <div class="col-md-9 align-center mx-3">
 
-            {{ page.content }}
+            {{ page.content|safe }}
 
         </div>
-        <div class="col-md-3 align-top">
+        <div class="vr"></div>
+        <div class="col-md-3 align-top mx-3">
             {% include "right_column.html" %}
         </div>
     </div>

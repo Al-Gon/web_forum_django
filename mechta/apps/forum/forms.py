@@ -1,7 +1,7 @@
 from django import forms
 from .models import *
 from django.contrib.auth.models import User
-from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
+from django.contrib.auth.forms import UserCreationForm, AuthenticationForm, UserChangeForm
 from django.core.exceptions import ValidationError
 
 
@@ -32,6 +32,31 @@ class ProfileForm(forms.ModelForm):
 
     def add_user_pk(self, pk):
         self.instance.user_id = pk
+
+
+class UserUpdateForm(forms.ModelForm):
+    username = forms.CharField(label='Логин', widget=forms.TextInput(attrs={'class': 'form-control'}))
+    first_name = forms.CharField(label='Имя', widget=forms.TextInput(attrs={'class': 'form-control'}))
+    last_name = forms.CharField(label='Фамилия', widget=forms.TextInput(attrs={'class': 'form-control'}))
+    email = forms.EmailField(label='Email', widget=forms.EmailInput(attrs={'class': 'form-control'}))
+
+    class Meta:
+        model = User
+        fields = ('username', 'first_name', 'last_name', 'email')
+
+
+class ProfileUpdateForm(forms.ModelForm):
+    phone = forms.CharField(label='Телефон', widget=forms.TextInput(attrs={'class': 'form-control'}))
+    # land_plot = forms.CharField(label='Участок', widget=forms.Select(attrs={'class': 'form-select'}))
+    image = forms.ImageField(label='Аватар')
+
+    class Meta:
+        model = Profile
+        fields = ('phone', 'land_plot', 'image')
+        widgets = {
+                    'land_plot': forms.Select(attrs={'class': 'form-select'})
+        }
+
 
 
 class LoginUserForm(AuthenticationForm):

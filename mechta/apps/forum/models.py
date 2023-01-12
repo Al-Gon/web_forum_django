@@ -1,8 +1,11 @@
 from django.db import models
 from django.contrib.auth.models import User
+from django.contrib.sessions.models import Session
 from django.utils import timezone
+from functools import reduce
+from django.conf import settings
 
-# Create your models here.
+
 class LandPlot(models.Model):
     NUMBERS = list(map(lambda x: (str(x), str(x)), range(1, 300)))
     number = models.CharField('номер участка', choices=NUMBERS, max_length=3)
@@ -10,15 +13,30 @@ class LandPlot(models.Model):
     def __str__(self):
         return self.number
 
+
 class Profile(models.Model):
-    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    user = models.OneToOneField(User, on_delete=models.CASCADE,)
+    slug = models.SlugField('url', max_length=255, db_index=True, unique=True)
     land_plot = models.ForeignKey(LandPlot, on_delete=models.CASCADE)
     phone = models.CharField('телефон', max_length=20, blank=True)
+    image = models.ImageField(null=True, blank=True, upload_to="images/profile/")
+    image_url = models.URLField(null=True, blank=True)
+    last_visit = models.DateTimeField('последнее посещение', default=timezone.now)
+    read_messages = models.BinaryField('прочитанные сообщения', default=b'', blank=True)
+
+    def save(self, *args, **kwargs):
+        self.slug = self.user.username + '-' + \
+                    reduce(lambda x, y: x + '-' if y in ['@', '.'] else x + y, list(self.user.email))
+        host = 'http://127.0.0.1:8000'
+        super().save(*args, **kwargs)
+        self.image_url = host + self.image.url
+        super().save(*args, **kwargs)
 
 
 class Section(models.Model):
     title = models.TextField('название раздела')
     description = models.TextField('описание раздела')
+    icon = models.CharField('иконка', max_length=50, default="", blank=True)
     pub_date = models.DateField('дата создания', default=timezone.now)
 
     def __str__(self):
@@ -44,7 +62,6 @@ class Topic(models.Model):
         return host + 'forum/' + str(self.section_id) + '/' + str(self.pk) + '/'
 
 
-
 class Message(models.Model):
     text = models.TextField('сообщение')
     topic_id = models.ForeignKey(Topic, on_delete=models.CASCADE)
@@ -56,3 +73,16 @@ class Message(models.Model):
 
     def __str__(self):
         return self.text
+
+
+class ForumSession(models.Model):
+    session_key = models.ForeignKey(Session, on_delete=models.CASCADE)
+    expire_date = models.DateTimeField('Время жизни')  # Время жизни
+    user_id = models.ForeignKey(User, on_delete=models.CASCADE)
+    last_visit = models.DateTimeField('последнее посещение', default=timezone.now)
+    pages_dict = models.JSONField('посещение страниц', default=dict)
+
+
+class ForumPagesCounter(models.Model):
+    page_url = models.CharField('url адрес страницы', max_length=100, blank=True)
+    visited = models.IntegerField('количество посещений', default=0)

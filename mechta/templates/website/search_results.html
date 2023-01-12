@@ -1,0 +1,93 @@
+{% extends "main.html" %}
+
+{% block title %} Результаты поиска по сайту {% endblock %}
+
+{% block second_page_link %}
+    <li class="breadcrumb-item active" aria-current="page">
+        Результаты поиска по сайту
+    </li>
+{% endblock %}
+
+{% block content_title %}
+    <h2 class="pb-2 border-bottom">
+        Результаты поиска по сайту
+    </h2>
+{% endblock %}
+
+{% block content %}
+    <div class="row row-cols-2 g-8 py-8">
+        <div class="col-md-9 align-center ">
+        {% if page %}
+            <div class="row border-bottom">
+                <div class="d-flex col-12 text-muted pt-3">
+                    Поиск " {{ query }} " по сайту - найдено {{ page.count }} результатов :
+                </div>
+            </div>
+            {% for item in page %}
+
+            <div class="row border-bottom">
+                <div class="d-flex col-12 text-muted pt-3">
+    {#                <p class="pb-3 mb-0 small lh-sm">#}
+    {#                    ...{{ item.topic_id__section_id__title }}...{{ item.topic_id__section_id__description }}...#}
+    {#                </p>#}
+    {#                <p class="pb-3 mb-0 small lh-sm">#}
+    {#                    ...{{ item.topic_id__title }}...{{ item.topic_id__description }}...#}
+    {#                </p>#}
+    {#                <p class="pb-3 mb-0 small lh-sm">#}
+    {#                    ...{{ item.text }}....#}
+    {#                </p>#}
+                    <a class="text-muted"
+                        href="
+
+
+                        {% if qw_1 >= forloop.counter %}
+
+                            {% if item.slug %}
+                                {% url 'website:page' item.slug %}
+                            {% else %}
+                                {% url 'website:home' %}
+                            {% endif %}
+
+                        {% else %}
+
+                            {% if item.slug %}
+                                {% url 'articles:article' item.slug %}
+                             {% endif %}
+
+                        {% endif %}
+                            ">
+                        <p class="pb-3 mb-0 small lh-sm">
+                            {{ forloop.counter }}.
+                            ...{{ item.title|slice:":20"  }}...
+                        {% if item.intro_text %}
+                                ...{{ item.intro_text|slice:":20"  }}...
+                        {% endif %}
+                        {% if item.content %}
+                                ...{{ item.content|slice:":30"  }}...
+                        {% endif %}
+                        </p>
+                    </a>
+
+                </div>
+            </div>
+            {% endfor %}
+        {% else %}
+            <div class="row border-bottom">
+                <div class="d-flex col-12 text-muted pt-3">
+                    Поиск " {{ query }} " по сайту - найдено 0 результатов :
+                </div>
+            </div>
+            <div class="row border-bottom">
+                <div class="d-flex col-12 text-muted pt-3">
+                    <p class="pb-3 mb-0 small lh-sm">
+                        К сожалению на сайте ничего не найдено.<br>
+                    </p>
+                </div>
+            </div>
+        {% endif %}
+
+
+
+        </div>
+    </div>
+{% endblock %}

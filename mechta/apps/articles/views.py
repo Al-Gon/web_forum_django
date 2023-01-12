@@ -19,7 +19,7 @@ class ArticleView(DataMixin, DetailView):
     model = Article
     context_object_name = 'page'
     template_name = 'articles/article.html'
-    pk_url_kwarg = 'article_id'
+    slug_url_kwarg = 'article_slug'
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)

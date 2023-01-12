@@ -1,0 +1,42 @@
+html {
+    font-size: 16px;
+}
+body {
+    font-family: "Public+Sans", sans-serif;
+    font-size: 16px;
+    font-weight: 300;
+    color: #000000;
+    background-color: #FFFFFF;
+    min-width: 320px;
+}
+strong {
+    font-weight: bold;
+}
+
+.btn-primary {
+  background-color: #eb9b46 !important;
+  border-color: #eb9b46 !important;
+}
+.btn-primary:hover,
+.btn-primary:active,
+.btn-primary:visited,
+.btn-primary:focus {
+  background-color: #b45f06 !important;
+  border-color: #b45f06 !important;
+}
+
+.menu-search-btn:hover,
+.menu-search-btn:active,
+.menu-search-btn:visited,
+.menu-search-btn:focus {
+    color: #eb9b46 !important;
+    border-color: #eb9b46 !important;
+}
+
+textarea:focus, input:focus {
+    border-color: rgba(180, 95, 6, 0.7) !important;
+    box-shadow: 0 1px 1px rgba(180, 95, 6, 0.075) inset, 0 0 8px rgba(180, 95, 6, 0.6) !important;
+    outline: 0 none !important;
+}
+
+

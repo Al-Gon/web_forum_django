@@ -4,13 +4,19 @@
 
 <head>
     <meta charset="UTF-8">
-
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>{% block title %}{% endblock %}</title>
-
+{#    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-GLhlTQ8iRABdZLl6O3oVMWSktQOp6b7In1Zl3/Jr59b6EGGoI1aFkw7cmDA6j6gD" crossorigin="anonymous">#}
+    <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@100;200;300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Poppins:wght@100;200;300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@100;200;300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/fastbootstrap@1.1.1/dist/css/fastbootstrap.min.css" rel="stylesheet" integrity="sha256-Yzz+k0rjOAAPX4Nkr73zQvppd6buXomR9n4uQ5lrSYE=" crossorigin="anonymous">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.1/jquery.min.js"></script>
+    <script src="https://kit.fontawesome.com/529186876d.js" crossorigin="anonymous"></script>
     {% load static %}
-    <link href="{% static 'website/css/bootstrap.min.css' %}" rel="stylesheet" type="text/css">
-    <link href="{% static 'website/css/font-awesome/css/font-awesome.min.css' %}" rel="stylesheet">
-{#    <script src="{% static 'website/js/bootstrap.min.js'%}"></script>#}
+    <link rel="stylesheet" href="{% static 'website/css/main.css' %}">
+    <script type="text/javascript" src="{% static 'website/js/main.js' %}"></script>
+
 </head>
 <body>
 
@@ -47,26 +53,24 @@
 
 {#footer ____________________________________   #}
 
-    <div class="container-fluid mb-0" style="background-color:#fffa90 ">
-        <footer class="row row-cols-1 row-cols-sm-2 row-cols-md-5 py-5 my-5 border-top">
-            <div class="col mb-3">
-                <a href="/" class="d-flex align-items-center mb-3 link-dark text-decoration-none">
-
-                </a>
-                <p class="text-muted">&copy: Все права защищены 2022.</p>
+    <footer class="container-fluid mb-0 mt-5" style="background-color:#eb9b46">
+        <div class="row justify-content-md-center">
+            <div class="container row-cols-1 col-10">
+                <div class="container row py-5 mt-0 mb-0">
+                    {% include 'bottom_menu.html' %}
+                    <div class="col-7 mb-3">
+                    </div>
+                    {% include 'last_messages.html' %}
+                </div>
+                <div class="row py-1 my-0 text-center">
+                     <p class="text-muted">&copy: Все права защищены 2022.</p>
+                </div>
             </div>
+        </div>
+    </footer>
 
-            <div class="col mb-3">
-
-            </div>
-
-            {% include 'bottom_menu.html' %}
-
-            {% include 'last_messages.html' %}
-
-        </footer>
-    </div>
-
+{#    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js" integrity="sha384-w76AqPfDkMBDXo30jS1Sgez6pr3x5MlQ1ZAGC+nuZB+EYdgRZgiwxhTBTkF7CXvN" crossorigin="anonymous"></script>#}
+    <script src="https://cdn.jsdelivr.net/npm/fastbootstrap@1.1.1/dist/js/fastbootstrap.min.js" integrity="sha256-EA7CcsZVlKgu1Vdk1Nsl648ddvyavbdyjR/vnaTuomk=" crossorigin="anonymous"></script>
 </body>
 
 </html>

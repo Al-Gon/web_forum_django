@@ -1,6 +1,6 @@
  {% load static %}
 
-    <div class="container-fluid p-0">
+    <div class="container-fluid p-0" style="background-color:#eb9b46">
         <div class="row align-items-center container-fluid m-0" style="height: 150px; background-image: url('{% static 'fon.jpg' %}')">
             <div class="col-lg-4 d-flex justify-content-center">
                 <div class="site-branding navbar-brand">
@@ -12,18 +12,17 @@
             </div>
         </div>
         <div class="row container-fluid justify-content-md-center">
-            <nav class="navbar navbar-expand-lg  navbar-light bg-light" aria-label="Main navigation">
+            <nav class="navbar navbar-expand-lg  navbar-light bg-transparent" aria-label="Main navigation">
                 <ul class="navbar-nav me-auto mb-2 mb-lg-0">
                 {% for title, url in menu_items %}
                     <li class="nav-item">
-                        <a class="nav-link fs-6 fw-semibold" href="{{ url }}">{{ title }}</a>
+                        <a class="nav-link fs-6 fw-semibold text-light" href="{{ url }}">{{ title }}</a>
                     </li>
                 {% endfor %}
                 </ul>
-
-                <form class="d-flex" role="search">
-                    <input class="form-control me-2" type="search" placeholder="Поиск по сайту" aria-label="Search">
-                    <button class="btn btn-outline-success" type="submit">Search</button>
+                <form class="d-flex" role="search" action="{% url 'website:search_results' %}" method="get">
+                    <input name="w_q" class="form-control rounded-3 me-2" type="search" placeholder="Поиск по сайту" aria-label="Search">
+                    <button class="btn btn-outline-light text-light menu-search-btn rounded-3" type="submit">Поиск</button>
                 </form>
             </nav>
         </div>

@@ -45,11 +45,14 @@
 
 
     {% if request.user.is_authenticated %}
-    {% if page %}
+{#    {% if page %}#}
         <div class="row border-bottom">
-            <div class="d-flex flex-nowrap col-9 text-muted pt-3 mb-0">
+            <div class="d-flex flex-nowrap col-9 text-muted pt-0">
 
                 {% for item in topic %}
+                <span class="px-3 mt-2">
+                    <icon class="fa-solid {{ item.section_id__icon }} fa-xl" style="color:#f1c232"></icon>
+                </span>
                 <div>
                     <h6 class="mb-1">Название темы:  <strong>{{ item.title }}.</strong></h6>
                     <p class="text-gray-dark"> Описание темы: {{ item.description }}</p>
@@ -57,77 +60,64 @@
                 {% endfor %}
 
             </div>
-            <div class="d-flex col-3 text-muted pt-0 mb-0">
-                <div class="d-grid col-6 mx-auto m-5">
-                    <a class="btn btn-primary btn-sm" href="{% url 'forum:reply' view.kwargs.section_id view.kwargs.topic_id %}"
+            <div class="d-flex col-3 text-muted pt-0">
+                <div class="d-grid col-6 mx-auto mb-4 mt-1">
+                    <a class="btn btn-primary rounded-3" href="{% url 'forum:reply' view.kwargs.section_id view.kwargs.topic_id %}"
                        role="button">Ответить</a>
                 </div>
             </div>
         </div>
 
         <div class="row border-bottom">
-            <div class="d-flex col-3 text-muted pt-3">
+            <div class="d-flex col-3 text-muted pt-3 justify-content-center">
                 <h6 class=" pb-2 mb-0">Автор</h6>
             </div>
-            <div class="d-flex col-7 text-muted  pt-3">
+            <div class="d-flex col-6 text-muted pt-3 justify-content-center">
                 <h6 class="pb-2 mb-0">Сообщения</h6>
             </div>
-            <div class="d-flex col-2 text-muted pt-3">
+            <div class="d-flex col-2 text-muted pt-3 justify-content-center">
                 <h6 class="pb-2 mb-0">Дата</h6>
+            </div>
+            <div class="d-flex col-1 text-muted pt-3 justify-content-center">
+                <h6 class="pb-2 mb-0">Прочитанно</h6>
             </div>
         </div>
 
+    {% if page %}
         {% for item in page %}
-
         <div class="row border-bottom">
-            <div class="d-flex col-3 text-muted pt-3">
-                <svg class="bd-placeholder-img flex-shrink-0 me-2 rounded" width="32" height="32" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Placeholder: 32x32" preserveAspectRatio="xMidYMid slice" focusable="false"><title>Placeholder</title><rect width="100%" height="100%" fill="#007bff"></rect><text x="50%" y="50%" fill="#007bff" dy=".3em">32x32</text></svg>
-                <p class="pb-3 mb-0 small lh-sm">
-                    {{ item.user_id__username }}, ( участок {{ item.user_id__profile__land_plot }})<br>
-                </p>
+            <div class="d-flex col-3 justify-content-start">
+                <div class="p-1">
+                {% if item.user_id__profile__image_url %}
+                    <img class="avatar" src="{{ item.user_id__profile__image_url }}"/>
+                {% else %}
+                    <span class="avatar avatar-48 bg-secondary text-white rounded-2">{{ item.user_id__username }}</span>
+                {% endif %}
+                </div>
+                <div class="pt-3">
+                    <p class="pb-3 mb-0 small lh-sm" >
+                        {{ item.user_id__username }}, ( участок {{ item.user_id__profile__land_plot }})<br>
+                    </p>
+                </div>
             </div>
-            <div class="d-flex col-7 text-muted  pt-3">
+            <div class="d-flex col-6 text-muted  pt-3">
                 <p class="pb-3 mb-0 small lh-sm">
                     {{ item.text }}
                 </p>
             </div>
-            <div class="d-flex col-2 text-muted pt-3">
+            <div class="d-flex col-2 text-muted pt-3 justify-content-center">
                 <p class="pb-3 mb-0 small lh-sm">
                     {{ item.pub_date }}
                 </p>
+            </div>
+            <div class="d-flex col-1 text-muted pt-3 justify-content-center">
+                <input class="form-check-input mt-0 message_box" action="{% url 'forum:messages-handler' %}" type="checkbox" name="is_read" data-id="{{ item.id }}" >
             </div>
         </div>
         {% endfor %}
 
     {% else %}
 
-        <div class="row border-bottom">
-            <div class="d-flex flex-nowrap col-9 text-muted pt-3">
-                {% for item in topic %}
-                <div>
-                    <h6 class="mb-0">Название темы: <strong>{{ item.title }}</strong></h6>
-                    <p class="text-gray-dark">Описание: {{ item.description }}</p>
-                </div>
-                {% endfor %}
-            </div>
-            <div class="d-flex col-3 text-muted pt-0">
-                <div class="d-grid col-6 mx-auto m-5">
-                    <a class="btn btn-primary btn-sm" href="{% url 'forum:reply' view.kwargs.section_id view.kwargs.topic_id %}"
-                       role="button">Ответить</a>
-                </div>
-            </div>
-        </div>
-        <div class="row border-bottom">
-            <div class="d-flex col-3 text-muted pt-3">
-                <h6 class=" pb-2 mb-0">Автор</h6>
-            </div>
-            <div class="d-flex col-7 text-muted  pt-3">
-                <h6 class="pb-2 mb-0">Сообщения</h6>
-            </div>
-            <div class="d-flex col-2 text-muted pt-3">
-                <h6 class="pb-2 mb-0">Дата</h6>
-            </div>
-        </div>
         <div class="row border-bottom">
             <div class="d-flex col-12 text-muted pt-3">
                 <svg class="bd-placeholder-img flex-shrink-0 me-2 rounded" width="32" height="32" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Placeholder: 32x32" preserveAspectRatio="xMidYMid slice" focusable="false"><title>Placeholder</title><rect width="100%" height="100%" fill="#007bff"></rect><text x="50%" y="50%" fill="#007bff" dy=".3em">32x32</text></svg>
@@ -140,22 +130,7 @@
 
     {% endif %}
 
-        <div class="container-fluid navbar-expand-lg navbar-light bg-light rounded shadow-sm">
-            <div class="d-flex mb-2 mt-2">
-                <div class="p-2">
-                    <a class="nav-link" href="#">Новые сообщения</a>
-                </div>
-                <div class="p-2">
-                    <a class="nav-link" href="#">Ничего нового</a>
-                </div>
-                <div class="p-2">
-                    <a class="nav-link" href="#">Отметить все как прочитанные</a>
-                </div>
-                <div class="p-2">
-                    <a class="nav-link" href="#">Показать непрочитанные темы</a>
-                </div>
-            </div>
-        </div>
+        {% include "forum/filter_panel.html" %}
 
     {% else %}
 

@@ -1,0 +1,68 @@
+{% extends "main.html" %}
+
+{% block title %} Форум {% endblock %}
+
+{% block second_page_link %}
+     <li class="breadcrumb-item">
+        <a href="{% url 'forum:page' %}">Форум</a>
+    </li>
+
+    <li class="breadcrumb-item active" aria-current="page">
+        Профиль: {{ page.user__username }}
+    </li>
+
+{% endblock %}
+
+{% block content_title %}
+
+    <h2 class="pb-2 border-bottom">
+        Форум
+    </h2>
+
+{% endblock %}
+
+{% block content %}
+
+<div class="row row-cols-1  align-items-md-center g-8 py-8">
+
+    {% include "forum/register_panel.html" %}
+
+    <div class=" my-3 p-3 bg-body rounded shadow-sm">
+        <div class="row border-bottom">
+            <p> Профиль: {{ page.user__username }} , (уч.{{ page.land_plot }})</p>
+            <div class="px-3 py-2">
+                <p>Аватар:</p>
+            {% if page.image_url %}
+                <img class="avatar avatar-xxl" src="{{ page.image_url }}"/>
+            {% else %}
+                <span class="avatar avatar-48 bg-secondary text-white rounded-2">b</span>
+            {% endif %}
+            </div>
+            <p> Имя: {{ page.user__first_name }}</p>
+            <p> Фамилия: {{ page.user__last_name }}</p>
+            <p> Последнее посещение: {{ page.last_visit }}</p>
+            <p> Дата регистрации: {{ page.user__date_joined }}</p>
+        </div>
+        <div class="row mt-2">
+            <p> Статистика пользователя: </p>
+        </div>
+        <div class="d-flex flex-row mb-2 border-bottom">
+            <div class="text-muted py-1 px-3">
+                <p> Создано тем: {{ page.num_topics }}</p>
+            </div>
+            <div class="text-muted py-1 px-3">
+                <p> Написанно сообщений: {{ page.num_messages }}</p>
+            </div>
+
+        </div>
+        <div class="d-flex flex-row text-muted pt-0">
+            <div class="me-auto mb-3 mt-1 ">
+                <a class="btn btn-primary rounded-3" href="{% url 'forum:user_profile_update' page.slug %}"
+                   role="button">Редактировать профиль</a>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+{% endblock %}

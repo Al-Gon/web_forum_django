@@ -16,14 +16,14 @@
 
 
 {% block content %}
-    <div class="row row-cols-2 g-8 py-8">
+    <div class="d-flex flex-row row-cols-2 g-8 py-8">
         <div class="col-md-9">
             <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 g-3">
             {% for item in page|slice:"::-1" %}
             <div class="col">
                 <div class="card" style="width: 18rem;">
                     <div class="card-body">
-                        <a class="text-black text-decoration-none" href="{% url "articles:article" item.id %}">
+                        <a class="text-black text-decoration-none" href="{% url "articles:article" item.slug %}">
                         <h5 class="card-title">{{ item.title }}</h5>
                         </a>
                         <p class="card-text">
@@ -36,6 +36,7 @@
             {% endfor %}
             </div>
         </div>
+        <div class="vr"></div>
         <div class="col-md-3 align-top">
             {% include "right_column.html" %}
         </div>
