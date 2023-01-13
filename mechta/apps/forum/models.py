@@ -24,12 +24,21 @@ class Profile(models.Model):
     last_visit = models.DateTimeField('последнее посещение', default=timezone.now)
     read_messages = models.BinaryField('прочитанные сообщения', default=b'', blank=True)
 
+    @property
+    def image_url_pr(self):
+        host = 'http://127.0.0.1:8000'
+        try:
+            url = host + self.image.url
+        except ValueError:
+            url = ''
+        return url
+
     def save(self, *args, **kwargs):
         self.slug = self.user.username + '-' + \
                     reduce(lambda x, y: x + '-' if y in ['@', '.'] else x + y, list(self.user.email))
-        host = 'http://127.0.0.1:8000'
+
         super().save(*args, **kwargs)
-        self.image_url = host + self.image.url
+        self.image_url = self.image_url_pr
         super().save(*args, **kwargs)
 
 

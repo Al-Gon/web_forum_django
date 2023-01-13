@@ -285,8 +285,10 @@ class ViewPage(DataMixin, ListView):
                                          partition_by=[F('id'), ])).\
             values('id', 'title', 'description', 'icon',
                    'topic__id', 'topic__message__text',
+                   'topic__message__pub_date',
                    'topic__message__user_id__username',
                    'topic__message__user_id__profile__land_plot',
+                   'topic__message__user_id__profile__image_url',
                    'num_messages', 'num_topics').\
             order_by('-topic__message__pub_date')
 

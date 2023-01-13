@@ -91,7 +91,9 @@
                 {% if item.user_id__profile__image_url %}
                     <img class="avatar" src="{{ item.user_id__profile__image_url }}"/>
                 {% else %}
-                    <span class="avatar avatar-48 bg-secondary text-white rounded-2">{{ item.user_id__username }}</span>
+                    <span class="avatar bg-secondary rounded-3" style="font-size:16px">
+                        {{ item.user_id__username|slice:2|upper }}
+                    </span>
                 {% endif %}
                 </div>
                 <div class="pt-3">

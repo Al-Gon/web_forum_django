@@ -35,7 +35,9 @@
             {% if page.image_url %}
                 <img class="avatar avatar-xxl" src="{{ page.image_url }}"/>
             {% else %}
-                <span class="avatar avatar-48 bg-secondary text-white rounded-2">b</span>
+                <span class="avatar avatar-xxl bg-secondary rounded-3" style="font-size:64px">
+                    {{ page.user__username|slice:2|upper }}
+                </span>
             {% endif %}
             </div>
             <p> Имя: {{ page.user__first_name }}</p>

@@ -2,6 +2,7 @@ from django import forms
 from .models import *
 from django.contrib.auth.models import User
 from django.contrib.auth.forms import UserCreationForm, AuthenticationForm, UserChangeForm
+from mechta.apps.image_widget import ImageWidget
 from django.core.exceptions import ValidationError
 
 
@@ -48,7 +49,7 @@ class UserUpdateForm(forms.ModelForm):
 class ProfileUpdateForm(forms.ModelForm):
     phone = forms.CharField(label='Телефон', widget=forms.TextInput(attrs={'class': 'form-control'}))
     # land_plot = forms.CharField(label='Участок', widget=forms.Select(attrs={'class': 'form-select'}))
-    image = forms.ImageField(label='Аватар')
+    image = forms.ImageField(label='Аватар', required=False, widget=ImageWidget())
 
     class Meta:
         model = Profile
