@@ -2,12 +2,12 @@ from website.models import SitePage
 from forum.models import *
 from django.conf import settings
 from django.apps import apps
-from forum.models import ForumSession
 from django.contrib.sessions.models import Session
 from django.contrib.auth.models import User
-import datetime
 from django.db.models import F
 from django.utils import timezone
+import datetime
+import os
 
 
 
@@ -173,3 +173,14 @@ def pack_values(items):
     else:
         result = ''
     return bytes(result, encoding='utf-8')
+
+
+def delete_old_image_file(instance):
+    old_profile = Profile.objects.filter(pk=instance.pk).values('image', 'image_url')[0]
+    if old_profile['image'] != instance.image:
+        host = 'http://127.0.0.1:8000/'
+        file_path = os.path.join('mechta/', old_profile['image_url'].replace(host, ''))
+        try:
+            os.remove(file_path)
+        except OSError as e:
+            print("Error: %s : %s" % (file_path, e.strerror))

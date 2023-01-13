@@ -4,7 +4,7 @@ from django.core.paginator import Paginator
 from django.shortcuts import redirect, reverse
 from django.urls import reverse_lazy
 from django.views.generic import ListView, DetailView, CreateView, UpdateView
-from mechta.apps.utils import DataMixin, setup_session, pack_values, unpack_value
+from mechta.apps.utils import DataMixin, setup_session, pack_values, unpack_value, delete_old_image_file
 from django.db.models import Count, F, Q, Window
 from django.db.models.functions import Rank, DenseRank
 from .forms import *
@@ -74,6 +74,7 @@ class UserProfileUpdate(DataMixin, UpdateView):
         user_form_ = self.user_form(self.request.POST, instance=self.object.user)
         if user_form_.is_valid():
             user_form_.save()
+            delete_old_image_file(form.instance)
             form.save()
             return redirect('forum:user_profile', user_slug=self.kwargs[self.slug_url_kwarg])
 
