@@ -17,7 +17,7 @@
     {% for item in section %}
 
     <li class="breadcrumb-item active" aria-current="page">
-        {{ item.title }}
+        Раздел: {{ item.title }}
     </li>
 
     {% endfor %}
@@ -117,9 +117,8 @@
         {% endif %}
 
 
-    {% include "forum/filter_panel.html" %}
 
-    {% include "forum/statistic_panel.html" %}
+        {% include "forum/statistic_panel.html" %}
 
     {% else %}
 

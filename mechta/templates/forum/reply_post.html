@@ -12,11 +12,13 @@
     {% for item in topic|slice:":1" %}
     <li class="breadcrumb-item">
         <a href="{% url 'forum:section' item.section_id__id %}">
-            {{ item.section_id__title }}
+            Раздел: {{ item.section_id__title }}
         </a>
     </li>
     <li class="breadcrumb-item">
-       <a href="{% url 'forum:topic' item.section_id__id item.id %}">{{ item.title }}</a>
+       <a href="{% url 'forum:topic' item.section_id__id item.id %}">
+           Тема: {{ item.title }}
+       </a>
     </li>
 
     {% endfor %}
@@ -117,22 +119,6 @@
         </div>
     </div>
     {% endfor %}
-</div>
-<div class="container-fluid navbar-expand-lg navbar-light bg-light rounded shadow-sm">
-    <div class="d-flex mb-2 mt-2">
-        <div class="p-2">
-            <a class="nav-link" href="#">Новые сообщения</a>
-        </div>
-        <div class="p-2">
-            <a class="nav-link" href="#">Ничего нового</a>
-        </div>
-        <div class="p-2">
-            <a class="nav-link" href="#">Отметить все как прочитанные</a>
-        </div>
-        <div class="p-2">
-            <a class="nav-link" href="#">Показать непрочитанные темы</a>
-        </div>
-    </div>
 </div>
 
 {% endblock %}

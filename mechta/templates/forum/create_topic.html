@@ -1,12 +1,43 @@
-{% extends "forum/../shlak/forum_category_page.html" %}
+{% extends "main.html" %}
 
+{% block title %}
+    Страница создания новой темы
+{% endblock %}
 
-{% block page_content %}
+{% block second_page_link %}
+
+    <li class="breadcrumb-item">
+        <a href="{% url 'forum:page' %}">Форум</a>
+    </li>
+    {% for item in section|slice:":1" %}
+    <li class="breadcrumb-item">
+        <a href="{% url 'forum:section' item.id %}">
+            Раздел: {{ item.title }}
+        </a>
+    </li>
+
+    {% endfor %}
+
+    <li class="breadcrumb-item active" aria-current="page">
+        Страница создания новой темы
+    </li>
+
+{% endblock %}
+
+{% block content_title %}
+
+    <h2 class="pb-2 border-bottom">
+        Страница создания новой темы
+    </h2>
+
+{% endblock %}
+
+{% block content %}
 
 <div class="container-fluid col-12">
 
     <div class="d-flex flex-nowrap col-9 text-muted pt-3 mb-0">
-    {% for item in section %}
+    {% for item in section|slice:":1" %}
         <div>
             <h6 class="mb-1">Название раздела:  <strong>{{ item.title }}</strong></h6>
             <p class="text-gray-dark"> Описание: {{ item.description }}</p>
@@ -30,91 +61,53 @@
                 </div>
             </div>
         {% endfor %}
-    <button class="btn btn-primary" type="submit">Создать тему</button>
+    <button class="btn btn-primary rounded-3" type="submit">Создать тему</button>
     </form>
-</div>
-
-{#{% regroup page by topic as data_list %}#}
-{##}
-{#{% for data in data_list %}#}
-{#<div class="row border-bottom">#}
-{#    <div class="d-flex flex-nowrap col-9 text-muted pt-3">#}
-{#        <div>#}
-{#            <h6 class="mb-0">Название темы:</h6><br>#}
-{#            <p class="text-gray-dark"><strong> {{ data.grouper }} </strong></p>#}
-{#        </div>#}
-{#    </div>#}
-{#    <div class="d-flex col-3 text-muted pt-0">#}
-{#        <div class="d-grid col-6 mx-auto m-5">#}
-{#            <a class="btn btn-primary btn-sm" href="{% url 'forum:reply' %}" role="button">Ответить</a>#}
-{#        </div>#}
-{#    </div>#}
-{#</div>#}
-{##}
-{##}
-{#<div class="row border-bottom">#}
-{#    <div class="d-flex col-3 text-muted pt-3">#}
-{#        <h6 class=" pb-2 mb-0">Автор</h6>#}
-{#    </div>#}
-{#    <div class="d-flex col-7 text-muted  pt-3">#}
-{#        <h6 class="pb-2 mb-0">Сообщения</h6>#}
-{#    </div>#}
-{#    <div class="d-flex col-2 text-muted pt-3">#}
-{#        <h6 class="pb-2 mb-0">Дата</h6>#}
-{#    </div>#}
-{#</div>#}
-{##}
-{##}
-{#{% for item in data.list %}#}
-{#<div class="row border-bottom">#}
-{#    <div class="d-flex col-3 text-muted pt-3">#}
-{#        <svg class="bd-placeholder-img flex-shrink-0 me-2 rounded" width="32" height="32" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Placeholder: 32x32" preserveAspectRatio="xMidYMid slice" focusable="false"><title>Placeholder</title><rect width="100%" height="100%" fill="#007bff"></rect><text x="50%" y="50%" fill="#007bff" dy=".3em">32x32</text></svg>#}
-{#        <p class="pb-3 mb-0 small lh-sm">#}
-{#            <a class="nav-link" href="">#}
-{#                <strong class="d-block text-gray-dark"> {{ item.ti }} </strong>#}
-{#            </a>#}
-{#            {{ item.user_id__username }}, ( участок {{ item.user_id__profile__land_plot }})<br>#}
-{#            Тем: {{ section.num_topics }} , Сообщений: {{ section.num_messages }}#}
-{#        </p>#}
-{#    </div>#}
-{#    <div class="d-flex col-7 text-muted  pt-3">#}
-{#        <p class="pb-3 mb-0 small lh-sm">#}
-{#            {{ item.text }}#}
-{#        </p>#}
-{##}
-{#        <svg class="bd-placeholder-img flex-shrink-0 me-2 rounded" width="32" height="32" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Placeholder: 32x32" preserveAspectRatio="xMidYMid slice" focusable="false"><title>Placeholder</title><rect width="100%" height="100%" fill="#007bff"></rect><text x="50%" y="50%" fill="#007bff" dy=".3em">32x32</text></svg>#}
-{#        <p class="pb-3 mb-0 small lh-sm">#}
-{#            <strong class="d-block text-gray-dark">{{ data.author}}</strong>#}
-{#            {{ data.last_message }} …<br>#}
-{#            {{ data.last_message_data }}#}
-{#        </p>#}
-{#    </div>#}
-{#    <div class="d-flex col-2 text-muted pt-3">#}
-{#        <p>#}
-{#            {{ item.pub_date }}#}
-{#        </p>#}
-{#    </div>#}
-{#</div>#}
-{#{% endfor %}#}
-{##}
-{#{% endfor %}#}
-
-
-<div class="container-fluid navbar-expand-lg navbar-light bg-light rounded shadow-sm">
-    <div class="d-flex mb-2 mt-2">
-        <div class="p-2">
-            <a class="nav-link" href="#">Новые сообщения</a>
+    <div class="row border-bottom my-3">
+         <h6 class=" py-2 mb-0">Темы созданные в этом разделе отсортированные по новизне.</h6>
+    </div>
+    <div class="row border-bottom">
+        <div class="d-flex col-3 text-muted pt-2">
+            <h6 class=" pb-2 mb-0">Автор</h6>
         </div>
-        <div class="p-2">
-            <a class="nav-link" href="#">Ничего нового</a>
+        <div class="d-flex col-7 text-muted  pt-2">
+            <h6 class="pb-2 mb-0">Тема</h6>
         </div>
-        <div class="p-2">
-            <a class="nav-link" href="#">Отметить все как прочитанные</a>
-        </div>
-        <div class="p-2">
-            <a class="nav-link" href="#">Показать непрочитанные темы</a>
+        <div class="d-flex col-2 text-muted pt-2">
+            <h6 class="pb-2 mb-0">Дата</h6>
         </div>
     </div>
+
+    {% for item in section %}
+    <div class="row border-bottom">
+        <div class="d-flex col-3 justify-content-start">
+            <div class="p-1">
+                {% if item.topic__user_id__profile__avatar__image_url %}
+                    <img class="avatar" src="{{ MEDIA_URL }}{{ item.topic__user_id__profile__avatar__image_url }}"/>
+                {% else %}
+                    <span class="avatar bg-secondary rounded-3" style="font-size:16px">
+                        {{ item.topic__user_id__username|slice:2|upper }}
+                    </span>
+                {% endif %}
+            </div>
+            <div class="pt-3">
+                <p class="pb-3 mb-0 small lh-sm">
+                    {{ item.topic__user_id__username }}, ( участок {{ item.topic__user_id__profile__land_plot }})<br>
+                </p>
+            </div>
+        </div>
+        <div class="d-flex col-7 text-muted  pt-3">
+            <p class="pb-3 mb-0 small lh-sm">
+                {{ item.topic__title }}
+            </p>
+        </div>
+        <div class="d-flex col-2 text-muted pt-3">
+            <p class="pb-3 mb-0 small lh-sm">
+                {{ item.topic__pub_date }}
+            </p>
+        </div>
+    </div>
+    {% endfor %}
 </div>
 
 {% endblock %}
