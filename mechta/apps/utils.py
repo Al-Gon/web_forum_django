@@ -10,7 +10,6 @@ import datetime
 import os
 
 
-
 class DataMixin:
 
     @staticmethod
@@ -175,11 +174,11 @@ def pack_values(items):
     return bytes(result, encoding='utf-8')
 
 
-def delete_old_image_file(instance):
-    old_profile = Profile.objects.filter(pk=instance.pk).values('image', 'image_url')[0]
-    if old_profile['image'] != instance.image:
-        host = 'http://127.0.0.1:8000/'
-        file_path = os.path.join('mechta/', old_profile['image_url'].replace(host, ''))
+def delete_old_avatar_file(instance):
+    old_avatar = Avatar.objects.filter(pk=instance.pk)[0]
+    if old_avatar.image != instance.image and old_avatar.image_url:
+        # old_avatar.image.delete(save=True)
+        file_path = os.path.join(settings.MEDIA_ROOT, old_avatar.image_url)
         try:
             os.remove(file_path)
         except OSError as e:

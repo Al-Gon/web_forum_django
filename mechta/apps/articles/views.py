@@ -1,4 +1,3 @@
-from django.shortcuts import render
 from django.views.generic import DetailView, ListView
 from mechta.apps.utils import DataMixin
 from .models import *
@@ -26,8 +25,3 @@ class ArticleView(DataMixin, DetailView):
         context = self.add_user_context(context=context,
                                         )
         return context
-
-
-
-
-

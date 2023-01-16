@@ -1,4 +1,3 @@
-# New version for Django 3.2-4.x
 import posixpath
 
 from django import forms

@@ -1,9 +1,8 @@
 from django import forms
 from .models import *
 from django.contrib.auth.models import User
-from django.contrib.auth.forms import UserCreationForm, AuthenticationForm, UserChangeForm
-from mechta.apps.image_widget import ImageWidget
-from django.core.exceptions import ValidationError
+from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
+from mechta.utils.image_widget import ImageWidget
 
 
 class UserForm(UserCreationForm):
@@ -49,15 +48,18 @@ class UserUpdateForm(forms.ModelForm):
 class ProfileUpdateForm(forms.ModelForm):
     phone = forms.CharField(label='Телефон', widget=forms.TextInput(attrs={'class': 'form-control'}))
     # land_plot = forms.CharField(label='Участок', widget=forms.Select(attrs={'class': 'form-select'}))
-    image = forms.ImageField(label='Аватар', required=False, widget=ImageWidget())
 
     class Meta:
         model = Profile
-        fields = ('phone', 'land_plot', 'image')
-        widgets = {
-                    'land_plot': forms.Select(attrs={'class': 'form-select'})
-        }
+        fields = ('phone', 'land_plot',)
+        widgets = {'land_plot': forms.Select(attrs={'class': 'form-select'})}
 
+class AvatarUpdateForm(forms.ModelForm):
+    image = forms.ImageField(label='Аватар', required=False, widget=ImageWidget())
+
+    class Meta:
+        model = Avatar
+        fields = ('image',)
 
 
 class LoginUserForm(AuthenticationForm):

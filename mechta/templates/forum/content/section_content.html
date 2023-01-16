@@ -44,21 +44,21 @@
 
     {% if request.user.is_authenticated %}
 
-        <div class="row border-bottom">
-            <div class="d-flex flex-nowrap col-9 text-muted pt-0">
-                {% for item in section %}
-                <span class="px-3 mt-2">
+        <div class="d-flex flex-md-row flex-nowrap border-bottom">
+            {% for item in section %}
+            <div class="w-10 align-self-center">
+                <span class="px-3">
                     <i class="fa-solid {{ item.icon }} fa-xl" style="color:#f1c232"></i>
                 </span>
-                <div>
-                    <h6 class="mb-1">Название раздела:  <strong>{{ item.title }}.</strong></h6>
-                    <p class="text-gray-dark"> Описание раздела: {{ item.description }}</p>
-                </div>
-                {% endfor %}
             </div>
-            <div class="d-flex col-3 text-muted pt-0">
-                <div class="d-grid col-6 mx-auto mb-4 mt-1 ">
-                    <a class="btn btn-primary btn-sm" href="{% url 'forum:create_topic' view.kwargs.section_id %}"
+            <div class="flex-fill w-60 text-muted my-1">
+                <h6 class="mb-1">Название раздела:  <strong>{{ item.title }}.</strong></h6>
+                <p class="text-gray-dark mb-0"> Описание раздела: {{ item.description }}</p>
+            </div>
+            {% endfor %}
+            <div class="flex w-30 text-muted align-self-center">
+                <div class="px-5">
+                    <a class="btn btn-primary rounded-3" href="{% url 'forum:create_topic' view.kwargs.section_id %}"
                        role="button">Создать новую тему</a>
                 </div>
             </div>

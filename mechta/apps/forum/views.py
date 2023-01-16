@@ -1,10 +1,9 @@
 from django.contrib.auth import logout, login
 from django.contrib.auth.views import LoginView
-from django.core.paginator import Paginator
-from django.shortcuts import redirect, reverse
+from django.shortcuts import redirect
 from django.urls import reverse_lazy
 from django.views.generic import ListView, DetailView, CreateView, UpdateView
-from mechta.apps.utils import DataMixin, setup_session, pack_values, unpack_value, delete_old_image_file
+from mechta.apps.utils import DataMixin, setup_session, pack_values, unpack_value, delete_old_avatar_file
 from django.db.models import Count, F, Q, Window
 from django.db.models.functions import Rank, DenseRank
 from .forms import *
@@ -59,6 +58,7 @@ class UserProfileUpdate(DataMixin, UpdateView):
     template_name = 'forum/profile_update_page.html'
     context_object_name = 'page'
     user_form = UserUpdateForm
+    avatar_form = AvatarUpdateForm
     model = Profile
     slug_url_kwarg = 'user_slug'
     # success_url = reverse_lazy('forum:user_profile', kwargs={'user_slug': user_slug})
@@ -68,13 +68,17 @@ class UserProfileUpdate(DataMixin, UpdateView):
         context = super().get_context_data(**kwargs)
         context = self.add_user_context(context=context)
         context['user_form'] = self.user_form(instance=self.object.user)
+        context['avatar_form'] = self.avatar_form(instance=self.object.avatar)
         return context
 
     def form_valid(self, form):
         user_form_ = self.user_form(self.request.POST, instance=self.object.user)
-        if user_form_.is_valid():
+        avatar_form_ = self.avatar_form(self.request.POST, self.request.FILES, instance=self.object.avatar)
+        if user_form_.is_valid() and avatar_form_.is_valid():
             user_form_.save()
-            delete_old_image_file(form.instance)
+            delete_old_avatar_file(self.object.avatar)
+            avatar_form_.save()
+
             form.save()
             return redirect('forum:user_profile', user_slug=self.kwargs[self.slug_url_kwarg])
 
@@ -91,7 +95,7 @@ class UserProfile(DataMixin, DetailView):
             annotate(num_topics=Count('user__topic__id', distinct=True)).\
             values('user__username', 'user__first_name',
                    'user__last_name', 'user__date_joined',
-                   'land_plot', 'phone', 'last_visit', 'slug', 'image_url',
+                   'land_plot', 'phone', 'last_visit', 'slug', 'avatar__image_url',
                    'num_messages', 'num_topics')
         return qw
 
@@ -180,6 +184,7 @@ class ReplyPost(DataMixin, CreateView):
                                                 'message__text', 'message__pub_date',
                                                 'message__user_id__username',
                                                 'message__user_id__profile__land_plot',
+                                                'message__user_id__profile__avatar__image_url',
                                                 'section_id__id', 'section_id__title'],
                                         order_by=['-message__pub_date']
                                         )
@@ -210,7 +215,7 @@ class ViewTopic(DataMixin, ListView):
             order_by('pub_date'). \
             values('id', 'text', 'pub_date',
                    'topic_id', 'user_id__username',
-                   'user_id__profile__land_plot', 'user_id__profile__image_url'
+                   'user_id__profile__land_plot', 'user_id__profile__avatar__image_url'
                    )
         return qw
 
@@ -289,7 +294,7 @@ class ViewPage(DataMixin, ListView):
                    'topic__message__pub_date',
                    'topic__message__user_id__username',
                    'topic__message__user_id__profile__land_plot',
-                   'topic__message__user_id__profile__image_url',
+                   'topic__message__user_id__profile__avatar__image_url',
                    'num_messages', 'num_topics').\
             order_by('-topic__message__pub_date')
 
@@ -297,7 +302,6 @@ class ViewPage(DataMixin, ListView):
 
     def get_context_data(self, **kwargs):
         setup_session(self.request)
-
         context = super().get_context_data(**kwargs)
         context = self.add_user_context(context=context,
                                         request_path=self.request.path,

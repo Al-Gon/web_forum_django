@@ -31,13 +31,13 @@ SECRET_KEY = 'django-insecure-op4wo86y&_jdw*pz+aq7b(89^1f#bku50u!o=^na_qz5)pz+@p
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
-
+ALLOWED_HOSTS = ['127.0.0.1']
 
 # Application definition
 
 INSTALLED_APPS = [
     'grappelli',
+    'django_crontab',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -64,7 +64,9 @@ MIDDLEWARE = [
 ]
 
 ROOT_URLCONF = 'mechta.urls'
+
 FORM_RENDERER = 'django.forms.renderers.TemplatesSetting'
+
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
@@ -78,6 +80,7 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'django.template.context_processors.media',
             ],
         },
     },
@@ -145,6 +148,15 @@ STATICFILES_DIRS = [
 
 MEDIA_ROOT = os.path.join(PROJECT_ROOT, 'media')
 MEDIA_URL = '/media/'
+
+CRONJOBS = [
+    ('/2 * * * *', 'forum.cron.my_cron_job')
+]
+
+
+DEFAULT_FILE_STORAGE = 'django.core.files.a.ASCIIFileSystemStorage'
+
+
 
 # print SQL queries in shell_plus
 SHELL_PLUS_PRINT_SQL = True

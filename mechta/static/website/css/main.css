@@ -18,8 +18,8 @@ strong {
   border-color: #eb9b46 !important;
 }
 .btn-primary:hover,
-.btn-primary:active,
-.btn-primary:visited,
+/*.btn-primary:active,*/
+/*.btn-primary:visited,*/
 .btn-primary:focus {
   background-color: #b45f06 !important;
   border-color: #b45f06 !important;

@@ -3,7 +3,7 @@ from django.contrib.auth.models import User
 from django.contrib.sessions.models import Session
 from django.utils import timezone
 from functools import reduce
-from django.conf import settings
+from mechta.utils.ascii_filesystem_storage import ASCIIFileSystemStorage
 
 
 class LandPlot(models.Model):
@@ -13,33 +13,39 @@ class LandPlot(models.Model):
     def __str__(self):
         return self.number
 
-
-class Profile(models.Model):
-    user = models.OneToOneField(User, on_delete=models.CASCADE,)
-    slug = models.SlugField('url', max_length=255, db_index=True, unique=True)
-    land_plot = models.ForeignKey(LandPlot, on_delete=models.CASCADE)
-    phone = models.CharField('телефон', max_length=20, blank=True)
-    image = models.ImageField(null=True, blank=True, upload_to="images/profile/")
+class Avatar(models.Model):
+    image = models.ImageField(null=True, blank=True, upload_to="images/profile/", storage=ASCIIFileSystemStorage())
     image_url = models.URLField(null=True, blank=True)
-    last_visit = models.DateTimeField('последнее посещение', default=timezone.now)
-    read_messages = models.BinaryField('прочитанные сообщения', default=b'', blank=True)
 
-    @property
-    def image_url_pr(self):
-        host = 'http://127.0.0.1:8000'
+    def get_image_url(self):
         try:
-            url = host + self.image.url
+            if self.image.name:
+                url = self.image.storage.get_pre_name(self.image.field.upload_to + self.image.name)
+            else:
+                raise ValueError
         except ValueError:
             url = ''
         return url
 
     def save(self, *args, **kwargs):
+        self.image_url = self.get_image_url()
+        super().save(*args, **kwargs)
+
+
+class Profile(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE,)
+    slug = models.SlugField('url', max_length=255, db_index=True, unique=True)
+    land_plot = models.ForeignKey(LandPlot, on_delete=models.CASCADE)
+    avatar = models.ForeignKey(Avatar, on_delete=models.CASCADE)
+    phone = models.CharField('телефон', max_length=20, blank=True)
+    last_visit = models.DateTimeField('последнее посещение', default=timezone.now)
+    read_messages = models.BinaryField('прочитанные сообщения', blank=True)
+
+    def save(self, *args, **kwargs):
         self.slug = self.user.username + '-' + \
                     reduce(lambda x, y: x + '-' if y in ['@', '.'] else x + y, list(self.user.email))
+        super().save(*args, **kwargs)
 
-        super().save(*args, **kwargs)
-        self.image_url = self.image_url_pr
-        super().save(*args, **kwargs)
 
 
 class Section(models.Model):

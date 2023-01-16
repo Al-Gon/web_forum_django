@@ -62,9 +62,9 @@
 
                     {% if section.topic__message__user_id__username is not None %}
                     <div class="d-flex flex-row">
-                        {% if section.topic__message__user_id__profile__image_url %}
+                        {% if section.topic__message__user_id__profile__avatar__image_url %}
                         <div>
-                            <img class="avatar" src="{{ section.topic__message__user_id__profile__image_url }}"/>
+                            <img class="avatar" src="{{ MEDIA_URL }}{{ section.topic__message__user_id__profile__avatar__image_url }}"/>
                         </div>
                         {% else %}
                         <div class="px-2">
