@@ -137,6 +137,7 @@ class SearchResult(DataMixin, ListView):
 
 
 class CreateTopic(DataMixin, CreateView):
+    context_object_name = 'page'
     model = Topic
     template_name = 'forum/create_topic.html'
     form_class = CreateTopicForm
@@ -149,7 +150,11 @@ class CreateTopic(DataMixin, CreateView):
                                         is_forum_page=True,
                                         request_path=self.request.path,
                                         id=self.kwargs['section_id'],
-                                        values=['title', 'description']
+                                        values=['id', 'title', 'description',
+                                                'topic__title', 'topic__pub_date',
+                                                'topic__user_id__username', 'topic__user_id__profile__land_plot',
+                                                'topic__user_id__profile__avatar__image_url'],
+                                        order_by=['-topic__pub_date']
                                         )
         return context
 
