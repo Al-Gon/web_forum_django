@@ -10,6 +10,7 @@ from .forms import *
 from .models import *
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.models import User
+from django.http import JsonResponse
 
 
 
@@ -43,13 +44,16 @@ def messages_handler(request):
         user = User.objects.get(pk=user_id)
         profile = Profile.objects.get(user=user)
         read_messages = unpack_value(profile.read_messages)
-        if pk in read_messages and checked == 'false':
-            read_messages.remove(pk)
-        elif pk not in read_messages and checked == 'true':
-            read_messages.append(pk)
-        profile.read_messages = pack_values(read_messages)
+        topic_messages = Message.objects.filter(topic_id=pk).values_list('id', flat=True)
+        topic_messages = list(map(lambda x: str(x), topic_messages))
+        if checked == 'false':
+            read_messages = list(set(read_messages).difference(set(topic_messages)))
+        elif checked == 'true':
+            read_messages = list(set(read_messages).union(set(topic_messages)))
 
+        profile.read_messages = pack_values(read_messages)
         profile.save()
+        return JsonResponse({"name": "ok"}, status=200)
 
 
 class UserProfileUpdate(DataMixin, UpdateView):
@@ -206,6 +210,33 @@ class ReplyPost(DataMixin, CreateView):
 
         return redirect('forum:topic', self.kwargs['section_id'], self.kwargs['topic_id'])
 
+############################################
+class ViewUnreadTopics(DataMixin, ListView):
+    model = Message
+    context_object_name = 'page'
+    template_name = 'forum/content/unread_topics.html'
+
+    def get_queryset(self):
+        read_messages_ = Profile.objects.get(user=self.request.user).read_messages
+        read_messages = unpack_value(read_messages_)
+        qw = self.model.objects.\
+            select_related('topic_id').\
+            exclude(id__in=read_messages).\
+            distinct('topic_id').values('topic_id', 'topic_id__title', 'topic_id__description')
+        return qw
+
+    def get_context_data(self, **kwargs):
+        setup_session(self.request)
+        context = super().get_context_data(**kwargs)
+        context = self.add_user_context(context=context,
+                                        is_forum_page=True,
+                                        request_path=self.request.path,
+                                        user=self.request.user
+                                        )
+        return context
+
+
+
 
 class ViewTopic(DataMixin, ListView):
     model = Message
@@ -310,7 +341,8 @@ class ViewPage(DataMixin, ListView):
         context = super().get_context_data(**kwargs)
         context = self.add_user_context(context=context,
                                         request_path=self.request.path,
-                                        is_forum_page=True)
+                                        is_forum_page=True,
+                                        user=self.request.user)
         return context
 
 

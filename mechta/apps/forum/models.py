@@ -39,7 +39,7 @@ class Profile(models.Model):
     avatar = models.ForeignKey(Avatar, on_delete=models.CASCADE)
     phone = models.CharField('телефон', max_length=20, blank=True)
     last_visit = models.DateTimeField('последнее посещение', default=timezone.now)
-    read_messages = models.BinaryField('прочитанные сообщения', blank=True)
+    read_messages = models.CharField('прочитанные сообщения', max_length=255, blank=True, default='')
 
     def save(self, *args, **kwargs):
         self.slug = self.user.username + '-' + \

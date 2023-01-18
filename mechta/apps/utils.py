@@ -1,11 +1,11 @@
 from website.models import SitePage
 from forum.models import *
-from django.conf import settings
 from django.apps import apps
 from django.contrib.sessions.models import Session
 from django.contrib.auth.models import User
 from django.db.models import F
 from django.utils import timezone
+from django.conf import settings
 import datetime
 import os
 
@@ -16,7 +16,6 @@ class DataMixin:
     def get_list_apps():
         return [apps.get_app_config(app.split('.')[0]) for app in settings.INSTALLED_APPS
                 if not app.startswith("django.")]
-
 
     def get_menu_items(self):
         host = 'http://127.0.0.1:8000/'
@@ -37,7 +36,11 @@ class DataMixin:
                 continue
         else:
             if params:
-                qw = model.objects.filter(id=params['id']).values(*params['values'])
+                qw = model.objects
+                if params.get('id') is not None:
+                    qw = qw.filter(id=params['id'])
+                if params.get('values') is not None:
+                    qw = qw.values(*params['values'])
                 if params.get('order_by') is not None:
                     qw = qw.order_by(*params['order_by'])
                 return qw
@@ -64,6 +67,11 @@ class DataMixin:
         return Message.objects.count()
 
     @staticmethod
+    def get_count_messages_after_last_visit(user):
+        last_visit = Profile.objects.filter(user=user).values('last_visit')
+        return Message.objects.filter(pub_date__gt=last_visit).count()
+
+    @staticmethod
     def get_count_users():
         time_delta = datetime.timedelta(minutes=5)
         now = timezone.now()
@@ -78,7 +86,8 @@ class DataMixin:
         qw = ForumPagesCounter.objects.filter(page_url=request_path).values('visited')
         return qw[0] if qw else {'visited': 0}
 
-    def add_user_context(self, context, context_model=None, is_forum_page=False, request_path=None, **kwargs):
+    def add_user_context(self, context, context_model=None, is_forum_page=False,
+                         request_path=None, user=None,  **kwargs):
 
         context['menu_items'] = self.get_menu_items()
         context['last_messages'] = self.get_last_messages()
@@ -92,6 +101,8 @@ class DataMixin:
             context['total_users'] = self.get_total_users()
             if request_path is not None:
                 context['total_visited'] = self.get_total_visited(request_path)
+            if user is not None and user.is_authenticated:
+                context['total_messages_after_last_visit'] = self.get_count_messages_after_last_visit(user)
         return context
 
 
@@ -142,10 +153,9 @@ def unpack_value(value_):
         items_ = list(range(int(item_[0]), int(item_[1]) + 1))
         return list(map(lambda x: str(x), items_))
 
-    value = value_.decode()
     items, result = [], []
-    if value:
-        items = value.split(',')
+    if value_:
+        items = value_.split(',')
 
     for item in items:
         if '-' in item:
@@ -171,7 +181,7 @@ def pack_values(items):
         result = ','.join(result)
     else:
         result = ''
-    return bytes(result, encoding='utf-8')
+    return result
 
 
 def delete_old_avatar_file(instance):

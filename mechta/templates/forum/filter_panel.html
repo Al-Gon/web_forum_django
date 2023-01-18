@@ -1,16 +1,34 @@
 <div class="container-fluid navbar-expand-lg navbar-light bg-light rounded shadow-sm">
     <div class="d-flex mb-2 mt-2">
+        {% if total_messages_after_last_visit %}
+            <div class="alert p-2" role="alert">
+                <i class="fa-solid fa-circle-info fa-lg text-green-400"></i> Новые сообщения
+            </div>
+            <div class="alert p-2 text-muted" role="alert">
+                <i class="fa-solid fa-circle-xmark fa-lg text-red-400"></i> Ничего нового
+            </div>
+        {% else %}
+            <div class="alert p-2 text-muted" role="alert">
+                <i class="fa-solid fa-circle-xmark fa-lg text-red-400"></i> Новые сообщения
+            </div>
+            <div class="alert p-2" role="alert">
+                <i class="fa-solid fa-circle-info fa-lg text-green-400"></i> Ничего нового
+            </div>
+        {% endif %}
         <div class="p-2">
-            <a class="nav-link" href="#">Новые сообщения</a>
+            {% if request.page.url == 'forum:unread_topics' %}
+            <a class="nav-link mark-all-topics" href="#">
+                <i class="fa-solid fa-circle-check fa-lg text-green-400"></i>
+                Отметить все темы как прочитанные
+            </a>
+            {% else %}
+            {% endif %}
         </div>
         <div class="p-2">
-            <a class="nav-link" href="#">Ничего нового</a>
-        </div>
-        <div class="p-2">
-            <a class="nav-link mark-all-messages" href="#">Отметить все как прочитанные</a>
-        </div>
-        <div class="p-2">
-            <a class="nav-link" href="#">Показать непрочитанные темы</a>
+            <a class="nav-link" href="{% url 'forum:unread_topics' %}">
+                <i class="fa-solid fa-book-open-reader fa-lg text-green-400"></i>
+                Показать непрочитанные темы
+            </a>
         </div>
     </div>
 </div>
