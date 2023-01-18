@@ -1,11 +1,17 @@
 $(document).ready(function() {
-    function fadeout_raw(elem){
+
+    function fadeout_raw(elem) {
         let row = elem.parent().parent();
         if (row.attr('data-raw-id') == elem.attr('data-id')) {
-            row.delay(1000).fadeOut(100, function (el=row) { el.remove();});
+            row.delay(1000).fadeOut(100,
+                function (el=row) {
+                    el.remove();
+                    if (!$(".check-input").length) {
+                       window.location = location.href;
+                    }
+                });
         }
     }
-
 
     function set_message(elem) {
         let pk = elem.attr("data-id");
@@ -31,7 +37,7 @@ $(document).ready(function() {
     }
 
     $(document).on("change", ".message_box", function(){
-            if($(this).prop("checked") == true) {
+            if($(this).prop("checked")) {
                 set_message($(this));
             }
     });
@@ -42,7 +48,7 @@ $(document).ready(function() {
 			event.preventDefault();
 		}
         $(".message_box").each(function() {
-            if ($(this).prop("checked") == false){
+            if (!$(this).prop("checked")){
                 $(this).prop("checked", true);
                 set_message($(this));
             }

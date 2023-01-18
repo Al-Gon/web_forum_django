@@ -16,7 +16,7 @@
             </div>
         {% endif %}
         <div class="p-2">
-            {% if request.page.url == 'forum:unread_topics' %}
+            {% if request.path == '/forum/unread_topics/' %}
             <a class="nav-link mark-all-topics" href="#">
                 <i class="fa-solid fa-circle-check fa-lg text-green-400"></i>
                 Отметить все темы как прочитанные
