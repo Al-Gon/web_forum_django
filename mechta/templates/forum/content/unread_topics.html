@@ -36,8 +36,11 @@
     {% if request.user.is_authenticated %}
         {% if page %}
             <div class="row border-bottom">
-                <div class="d-flex col-9 text-muted pt-3">
+                <div class="d-flex col-6 text-muted pt-3">
                     <h6 class=" pb-2 mb-0">Название темы</h6>
+                </div>
+                <div class="d-flex col-3 text-muted pt-3 justify-content-center">
+                    <h6 class=" pb-2 mb-0">Кол-во сообщений</h6>
                 </div>
                 <div class="d-flex col-3 text-muted pt-3 justify-content-center">
                     <h6 class="pb-2 mb-0">Прочитанно</h6>
@@ -45,22 +48,27 @@
 
             </div>
             {% for item in page %}
-            <div class="row border-bottom" data-raw-id="{{ item.topic_id }}">
-                <div class="d-flex col-9 text-muted pt-3">
+            <div class="row border-bottom" data-row-id="{{ item.topic_id }}">
+                <div class="d-flex col-6 text-muted pt-3">
 
                     <span class="px-3 mt-2">
                         <i class="fa-regular fa-pen-to-square fa-xl" style="color:#f1c232"></i>
                     </span>
 
                     <p class="pb-3 mb-0 small lh-sm">
-                        <a class="nav-link" href="">
-                            <strong class="d-block text-gray-dark"> {{ item.topic_id__title }} </strong>
+                        <a class="nav-link" href="{% url 'forum:topic' item.topic__section_id item.topic_id %}">
+                            <strong class="d-block text-gray-dark"> {{ item.topic__title }} </strong>
                         </a>
-                        {{ item.topic_id__description }}<br>
+                        {{ item.topic__description }}<br>
                     </p>
                 </div>
                 <div class="d-flex col-3 text-muted pt-3 justify-content-center">
-                    <input class="form-check-input mt-0 message_box check-input" action="{% url 'forum:messages-handler' %}" type="checkbox" name="is_read" data-id="{{ item.topic_id }}" >
+                     <p class="pb-3 mb-0 small lh-sm">
+                         {{ item.num_messages }}
+                     </p>
+                </div>
+                <div class="d-flex col-3 text-muted pt-3 justify-content-center">
+                    <input class="form-check-input mt-0 message_box check-input" action="{% url 'forum:topic-handler' %}" type="checkbox" name="is_read" data-id="{{ item.topic_id }}" >
                 </div>
             </div>
             {% endfor %}
@@ -85,5 +93,3 @@
 </div>
 
 {% endblock %}
-
-

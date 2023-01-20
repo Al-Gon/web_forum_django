@@ -6,6 +6,7 @@ from functools import reduce
 from mechta.utils.ascii_filesystem_storage import ASCIIFileSystemStorage
 
 
+
 class LandPlot(models.Model):
     NUMBERS = list(map(lambda x: (str(x), str(x)), range(1, 300)))
     number = models.CharField('номер участка', choices=NUMBERS, max_length=3)
@@ -36,7 +37,7 @@ class Profile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE,)
     slug = models.SlugField('url', max_length=255, db_index=True, unique=True)
     land_plot = models.ForeignKey(LandPlot, on_delete=models.CASCADE)
-    avatar = models.ForeignKey(Avatar, on_delete=models.CASCADE)
+    avatar = models.ForeignKey(Avatar, on_delete=models.CASCADE, null=True)
     phone = models.CharField('телефон', max_length=20, blank=True)
     last_visit = models.DateTimeField('последнее посещение', default=timezone.now)
     read_messages = models.CharField('прочитанные сообщения', max_length=255, blank=True, default='')
@@ -65,7 +66,7 @@ class Section(models.Model):
 class Topic(models.Model):
     title = models.TextField('название темы')
     description = models.TextField('описание темы')
-    pub_date = models.DateField('дата создания', default=timezone.now)
+    pub_date = models.DateTimeField('дата создания', default=timezone.now)
     user_id = models.ForeignKey(User, on_delete=models.CASCADE)
     section_id = models.ForeignKey(Section, on_delete=models.CASCADE)
 
@@ -80,7 +81,7 @@ class Topic(models.Model):
 class Message(models.Model):
     text = models.TextField('сообщение')
     topic_id = models.ForeignKey(Topic, on_delete=models.CASCADE)
-    pub_date = models.DateField('дата публикации', default=timezone.now)
+    pub_date = models.DateTimeField('дата публикации', default=timezone.now)
     user_id = models.ForeignKey(User, on_delete=models.CASCADE)
 
     class Meta:
@@ -92,12 +93,16 @@ class Message(models.Model):
 
 class ForumSession(models.Model):
     session_key = models.ForeignKey(Session, on_delete=models.CASCADE)
-    expire_date = models.DateTimeField('Время жизни')  # Время жизни
+    expire_date = models.DateTimeField('Время жизни')
     user_id = models.ForeignKey(User, on_delete=models.CASCADE)
     last_visit = models.DateTimeField('последнее посещение', default=timezone.now)
     pages_dict = models.JSONField('посещение страниц', default=dict)
 
-
 class ForumPagesCounter(models.Model):
     page_url = models.CharField('url адрес страницы', max_length=100, blank=True)
     visited = models.IntegerField('количество посещений', default=0)
+
+class ForumReadTopic(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    topic = models.ForeignKey(Topic, on_delete=models.CASCADE)
+    last_view = models.DateTimeField('последний просмотр', default=timezone.now)

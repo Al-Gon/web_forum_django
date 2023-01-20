@@ -75,7 +75,7 @@
     <button class="btn btn-primary rounded-3" type="submit">Оставить сообщение</button>
     </form>
     {% for item in topic %}
-        {% if item.item.message__user_id__username is not None %}
+        {% if item.message__user_id__username is not None %}
             {% if forloop.first %}
                 <div class="row border-bottom my-3">
                      <h6 class=" py-2 mb-0">Сообщения в теме отсортированны по новизне.</h6>

@@ -17,6 +17,16 @@
         </div>
 
 
+        <div class="nav-item pt-1">
+
+            {% if user.profile.avatar.image_url %}
+                <img class="avatar " src="{{MEDIA_URL}}{{ user.profile.avatar.image_url }}"/>
+            {% else %}
+                <span class="avatar bg-secondary rounded-3 " style="font-size:16px">
+                    {{ user.username|slice:2|upper }}
+                </span>
+            {% endif %}
+        </div>
         <div class="nav-item p-2">
             {{user.username}}
         </div>

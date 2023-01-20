@@ -3,14 +3,14 @@ from django.contrib.auth.views import LoginView
 from django.shortcuts import redirect
 from django.urls import reverse_lazy
 from django.views.generic import ListView, DetailView, CreateView, UpdateView
-from mechta.apps.utils import DataMixin, setup_session, pack_values, unpack_value, delete_old_avatar_file
+from mechta.apps.utils import DataMixin, setup_session, delete_old_avatar_file, set_read_topic
 from django.db.models import Count, F, Q, Window
 from django.db.models.functions import Rank, DenseRank
 from .forms import *
 from .models import *
 from django.views.decorators.csrf import csrf_exempt
-from django.contrib.auth.models import User
 from django.http import JsonResponse
+from django.db.models import Subquery
 
 
 
@@ -36,24 +36,16 @@ from django.http import JsonResponse
 #     return render(request, 'forum/shlak/test.html', context=context)
 
 @csrf_exempt
-def messages_handler(request):
+def topic_handler(request):
     if request.is_ajax():
-        pk = request.POST.get('pk')
+        topic_id = request.POST.get('topic_id')
         checked = request.POST.get('checked')
-        user_id = request.user.id
-        user = User.objects.get(pk=user_id)
-        profile = Profile.objects.get(user=user)
-        read_messages = unpack_value(profile.read_messages)
-        topic_messages = Message.objects.filter(topic_id=pk).values_list('id', flat=True)
-        topic_messages = list(map(lambda x: str(x), topic_messages))
-        if checked == 'false':
-            read_messages = list(set(read_messages).difference(set(topic_messages)))
-        elif checked == 'true':
-            read_messages = list(set(read_messages).union(set(topic_messages)))
+        if checked == 'true':
+            set_read_topic(user=request.user, topic_id=topic_id)
 
-        profile.read_messages = pack_values(read_messages)
-        profile.save()
-        return JsonResponse({"name": "ok"}, status=200)
+            return JsonResponse({"topic_id": str(topic_id)}, status=200)
+        else:
+            return JsonResponse({}, status=200)
 
 
 class UserProfileUpdate(DataMixin, UpdateView):
@@ -77,6 +69,8 @@ class UserProfileUpdate(DataMixin, UpdateView):
 
     def form_valid(self, form):
         user_form_ = self.user_form(self.request.POST, instance=self.object.user)
+        if self.object.avatar is None:
+            self.object.avatar = Avatar.objects.create()
         avatar_form_ = self.avatar_form(self.request.POST, self.request.FILES, instance=self.object.avatar)
         if user_form_.is_valid() and avatar_form_.is_valid():
             user_form_.save()
@@ -210,20 +204,24 @@ class ReplyPost(DataMixin, CreateView):
 
         return redirect('forum:topic', self.kwargs['section_id'], self.kwargs['topic_id'])
 
-############################################
+
 class ViewUnreadTopics(DataMixin, ListView):
-    model = Message
+    model = ForumReadTopic
     context_object_name = 'page'
     template_name = 'forum/content/unread_topics.html'
 
     def get_queryset(self):
-        read_messages_ = Profile.objects.get(user=self.request.user).read_messages
-        read_messages = unpack_value(read_messages_)
-        qw = self.model.objects.\
-            select_related('topic_id').\
-            exclude(id__in=read_messages).\
-            distinct('topic_id').values('topic_id', 'topic_id__title', 'topic_id__description')
-        return qw
+        read_topics = self.model.objects.filter(user=self.request.user)
+        qw1 = Topic.objects.exclude(id__in=Subquery(read_topics.values('topic'))).\
+            annotate(num_messages=Count('message')).\
+            values('num_messages', 'id', 'title', 'description', 'section_id')
+
+        qw2 = self.model.objects.\
+            filter(user=self.request.user, topic__message__pub_date__gt=F('last_view')).\
+            annotate(num_messages=Count('topic__message')).\
+            values('num_messages', 'topic_id', 'topic__title', 'topic__description', 'topic__section_id')
+
+        return qw2.union(qw1)
 
     def get_context_data(self, **kwargs):
         setup_session(self.request)
@@ -236,8 +234,6 @@ class ViewUnreadTopics(DataMixin, ListView):
         return context
 
 
-
-
 class ViewTopic(DataMixin, ListView):
     model = Message
     context_object_name = 'page'
@@ -245,6 +241,7 @@ class ViewTopic(DataMixin, ListView):
     pk_url_kwarg = 'topic_id'
 
     def get_queryset(self):
+
         qw = self.model.objects. \
             filter(topic_id=self.kwargs[self.pk_url_kwarg]). \
             select_related('topic_id', 'user_id', 'user_id__profile'). \
@@ -256,7 +253,7 @@ class ViewTopic(DataMixin, ListView):
         return qw
 
     def get_context_data(self, **kwargs):
-        setup_session(self.request)
+        setup_session(self.request, self.kwargs[self.pk_url_kwarg])
         context = super().get_context_data(**kwargs)
         context = self.add_user_context(context=context,
                                         context_model='topic',
@@ -266,8 +263,6 @@ class ViewTopic(DataMixin, ListView):
                                         values=['title', 'description',
                                                 'section_id__id', 'section_id__title', 'section_id__icon'])
         return context
-
-
 
 
 class ViewSection(DataMixin, ListView):
@@ -304,7 +299,6 @@ class ViewPage(DataMixin, ListView):
     model = Section
     context_object_name = 'page'
     template_name = 'forum/content/forum_content.html'
-
 
     def get_queryset(self):
         # qw = self.model.objects.\

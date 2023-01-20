@@ -106,7 +106,13 @@ class DataMixin:
         return context
 
 
-def setup_session(request):
+def set_read_topic(user, topic_id):
+    topic = Topic.objects.get(pk=topic_id)
+    _, _ = ForumReadTopic.objects.update_or_create(user=user, topic=topic, defaults={'last_view': timezone.now()})
+
+
+
+def setup_session(request, topic_id=None):
     if request.path.count('forum/'):
         page_url = request.path
 
@@ -137,6 +143,9 @@ def setup_session(request):
                 session = ForumSession.objects.get(session_key=request.session.session_key)
                 session.save()
 
+            if topic_id is not None:
+                set_read_topic(user=user, topic_id=topic_id)
+
         try:
             forum_pages_counter = ForumPagesCounter.objects.get(page_url=page_url)
             forum_pages_counter.visited = (F('visited') + 1)
@@ -147,44 +156,8 @@ def setup_session(request):
             forum_pages_counter.save()
 
 
-def unpack_value(value_):
-    def get_item(item_):
-        item_ = item_.split('-')
-        items_ = list(range(int(item_[0]), int(item_[1]) + 1))
-        return list(map(lambda x: str(x), items_))
-
-    items, result = [], []
-    if value_:
-        items = value_.split(',')
-
-    for item in items:
-        if '-' in item:
-            result += get_item(item)
-        else:
-            result.append(item)
-    return result
-
-def pack_values(items):
-    def get_item(tmp_list):
-        return tmp_list[0] + '-' + tmp_list[-1] if len(tmp_list) > 1 else tmp_list[0]
-
-    if items:
-        items.sort(key=lambda x: int(x))
-        result, tmp = [], []
-        for item in items:
-            if tmp:
-                if int(item) - int(tmp[-1]) != 1:
-                    result.append(get_item(tmp))
-                    tmp.clear()
-            tmp.append(item)
-        result.append(get_item(tmp))
-        result = ','.join(result)
-    else:
-        result = ''
-    return result
-
-
 def delete_old_avatar_file(instance):
+
     old_avatar = Avatar.objects.filter(pk=instance.pk)[0]
     if old_avatar.image != instance.image and old_avatar.image_url:
         # old_avatar.image.delete(save=True)
