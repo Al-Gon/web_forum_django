@@ -6,10 +6,14 @@ from mechta.utils.image_widget import ImageWidget
 
 
 class UserForm(UserCreationForm):
-    username = forms.CharField(label='Логин', widget=forms.TextInput(attrs={'class': 'form-control'}))
-    email = forms.EmailField(label='Email', widget=forms.EmailInput(attrs={'class': 'form-control'}))
-    password1 = forms.CharField(label='Пароль', widget=forms.PasswordInput(attrs={'class': 'form-control'}))
-    password2 = forms.CharField(label='Повтор пароля', widget=forms.PasswordInput(attrs={'class': 'form-control'}))
+    username = forms.CharField(label='Логин',
+                               widget=forms.TextInput(attrs={'class': 'form-control'}))
+    email = forms.EmailField(label='Email',
+                             widget=forms.EmailInput(attrs={'class': 'form-control'}))
+    password1 = forms.CharField(label='Пароль',
+                                widget=forms.PasswordInput(attrs={'class': 'form-control'}))
+    password2 = forms.CharField(label='Повтор пароля',
+                                widget=forms.PasswordInput(attrs={'class': 'form-control'}))
 
     class Meta:
         model = User
@@ -35,10 +39,15 @@ class ProfileForm(forms.ModelForm):
 
 
 class UserUpdateForm(forms.ModelForm):
-    username = forms.CharField(label='Логин', widget=forms.TextInput(attrs={'class': 'form-control'}))
-    first_name = forms.CharField(label='Имя', widget=forms.TextInput(attrs={'class': 'form-control'}))
-    last_name = forms.CharField(label='Фамилия', widget=forms.TextInput(attrs={'class': 'form-control'}))
-    email = forms.EmailField(label='Email', widget=forms.EmailInput(attrs={'class': 'form-control'}))
+    username = forms.CharField(label='Логин',
+                               widget=forms.TextInput(attrs={'class': 'form-control'}),
+                               disabled=True)
+    first_name = forms.CharField(label='Имя',
+                                 widget=forms.TextInput(attrs={'class': 'form-control'}))
+    last_name = forms.CharField(label='Фамилия',
+                                widget=forms.TextInput(attrs={'class': 'form-control'}))
+    email = forms.EmailField(label='Email',
+                             widget=forms.EmailInput(attrs={'class': 'form-control'}))
 
     class Meta:
         model = User
@@ -46,16 +55,20 @@ class UserUpdateForm(forms.ModelForm):
 
 
 class ProfileUpdateForm(forms.ModelForm):
-    phone = forms.CharField(label='Телефон', widget=forms.TextInput(attrs={'class': 'form-control'}))
-    # land_plot = forms.CharField(label='Участок', widget=forms.Select(attrs={'class': 'form-select'}))
+    phone = forms.CharField(label='Телефон',
+                            widget=forms.TextInput(attrs={'class': 'form-control'}))
 
     class Meta:
         model = Profile
         fields = ('phone', 'land_plot',)
+        labels = {'land_plot': 'Номер участка'}
         widgets = {'land_plot': forms.Select(attrs={'class': 'form-select'})}
 
+
 class AvatarUpdateForm(forms.ModelForm):
-    image = forms.ImageField(label='Аватар', required=False, widget=ImageWidget())
+    image = forms.ImageField(label='Аватар',
+                             required=False,
+                             widget=ImageWidget())
 
     class Meta:
         model = Avatar
@@ -63,8 +76,10 @@ class AvatarUpdateForm(forms.ModelForm):
 
 
 class LoginUserForm(AuthenticationForm):
-    username = forms.CharField(label='Логин', widget=forms.TextInput(attrs={'class': 'form-control'}))
-    password = forms.CharField(label='Пароль', widget=forms.PasswordInput(attrs={'class': 'form-control'}))
+    username = forms.CharField(label='Логин',
+                               widget=forms.TextInput(attrs={'class': 'form-control'}))
+    password = forms.CharField(label='Пароль',
+                               widget=forms.PasswordInput(attrs={'class': 'form-control'}))
 
 
 class ReplyPostForm(forms.ModelForm):

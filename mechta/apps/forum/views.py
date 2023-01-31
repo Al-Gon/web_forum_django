@@ -11,6 +11,7 @@ from .models import *
 from django.views.decorators.csrf import csrf_exempt
 from django.http import JsonResponse
 from django.db.models import Subquery
+from django.contrib.auth.models import Group
 
 
 
@@ -76,7 +77,6 @@ class UserProfileUpdate(DataMixin, UpdateView):
             user_form_.save()
             delete_old_avatar_file(self.object.avatar)
             avatar_form_.save()
-
             form.save()
             return redirect('forum:user_profile', user_slug=self.kwargs[self.slug_url_kwarg])
 
@@ -93,7 +93,7 @@ class UserProfile(DataMixin, DetailView):
             annotate(num_topics=Count('user__topic__id', distinct=True)).\
             values('user__username', 'user__first_name',
                    'user__last_name', 'user__date_joined',
-                   'land_plot', 'phone', 'last_visit', 'slug', 'avatar__image_url',
+                   'land_plot__number', 'phone', 'last_visit', 'slug', 'avatar__image_url',
                    'num_messages', 'num_topics')
         return qw
 
@@ -150,7 +150,8 @@ class CreateTopic(DataMixin, CreateView):
                                         id=self.kwargs['section_id'],
                                         values=['id', 'title', 'description',
                                                 'topic__title', 'topic__pub_date',
-                                                'topic__user_id__username', 'topic__user_id__profile__land_plot',
+                                                'topic__user_id__username',
+                                                'topic__user_id__profile__land_plot__number',
                                                 'topic__user_id__profile__avatar__image_url'],
                                         order_by=['-topic__pub_date']
                                         )
@@ -165,7 +166,6 @@ class CreateTopic(DataMixin, CreateView):
         form.save()
 
         return redirect('forum:section', self.kwargs['section_id'])
-
 
 
 class ReplyPost(DataMixin, CreateView):
@@ -186,7 +186,7 @@ class ReplyPost(DataMixin, CreateView):
                                         values=['id', 'title', 'description',
                                                 'message__text', 'message__pub_date',
                                                 'message__user_id__username',
-                                                'message__user_id__profile__land_plot',
+                                                'message__user_id__profile__land_plot__number',
                                                 'message__user_id__profile__avatar__image_url',
                                                 'section_id__id', 'section_id__title'],
                                         order_by=['-message__pub_date']
@@ -241,14 +241,13 @@ class ViewTopic(DataMixin, ListView):
     pk_url_kwarg = 'topic_id'
 
     def get_queryset(self):
-
         qw = self.model.objects. \
             filter(topic_id=self.kwargs[self.pk_url_kwarg]). \
             select_related('topic_id', 'user_id', 'user_id__profile'). \
             order_by('pub_date'). \
             values('id', 'text', 'pub_date',
                    'topic_id', 'user_id__username',
-                   'user_id__profile__land_plot', 'user_id__profile__avatar__image_url'
+                   'user_id__profile__land_plot__number', 'user_id__profile__avatar__image_url'
                    )
         return qw
 
@@ -301,15 +300,6 @@ class ViewPage(DataMixin, ListView):
     template_name = 'forum/content/forum_content.html'
 
     def get_queryset(self):
-        # qw = self.model.objects.\
-        #     annotate(num_topics=Count('topic__id', distinct=True)).\
-        #     annotate(num_messages=Count('topic__message__id', distinct=True)).\
-        #     values('id', 'title', 'description', 'num_topics', 'num_messages',
-        #            'topic__message__pub_date', 'topic__message__text')
-        #     # annotate(latest_message=FilteredRelation('topic__message__pub_date',
-        #     #                                          condition=Q(topic__message__pub_date=Max('topic__message__pub_date')))).\
-        #     # values('topic__message__pub_date', 'topic__message__text', 'latest_message')
-
         qw = self.model.objects. \
             annotate(num_messages=Window(expression=Count('topic__message__id'),
                                          partition_by=[F('id')])). \
@@ -323,7 +313,7 @@ class ViewPage(DataMixin, ListView):
                    'topic__id', 'topic__message__text',
                    'topic__message__pub_date',
                    'topic__message__user_id__username',
-                   'topic__message__user_id__profile__land_plot',
+                   'topic__message__user_id__profile__land_plot__number',
                    'topic__message__user_id__profile__avatar__image_url',
                    'num_messages', 'num_topics').\
             order_by('-topic__message__pub_date')
@@ -357,6 +347,8 @@ class RegisterUser(DataMixin, CreateView):
         pro_form_ = self.pro_form(self.request.POST)
         if pro_form_.is_valid():
             user = form.save()
+            forum_members = Group.objects.get(name='forum_members')
+            user.groups.add(forum_members)
             pro_form_.add_user_pk(user.pk)
             pro_form_.save()
             login(self.request, user)

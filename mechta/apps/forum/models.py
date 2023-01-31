@@ -9,7 +9,7 @@ from mechta.utils.ascii_filesystem_storage import ASCIIFileSystemStorage
 
 class LandPlot(models.Model):
     NUMBERS = list(map(lambda x: (str(x), str(x)), range(1, 300)))
-    number = models.CharField('номер участка', choices=NUMBERS, max_length=3)
+    number = models.CharField('номер участка', choices=NUMBERS, max_length=3, unique=True)
 
     def __str__(self):
         return self.number
