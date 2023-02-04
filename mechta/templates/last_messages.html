@@ -1,14 +1,14 @@
 <div class="col mb-3">
     <h5 class="text-muted fw-semibold">Последние сообщения</h5>
     <ul class="nav flex-column">
-    {% for message in last_messages|slice:":2" %}
+    {% for message in last_messages %}
         <li class="nav-item mb-1 border-bottom text-light">
             <a class="nav-link p-0 text-light"
                href="{% url 'forum:topic' message.topic_id__section_id__id message.topic_id__id %}">
                 <h7>Тема: <strong>{{ message.topic_id__title }}</strong></h7>
             </a>
             <p>
-                от {{ message.user_id__username }} (уч. {{ message.user_id__profile__land_plot }})<br>
+                от {{ message.user_id__username }} (уч. {{ message.user_id__profile__land_plot__number }})<br>
                 {{ message.pub_date }}
             </p>
         </li>

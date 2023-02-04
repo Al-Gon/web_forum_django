@@ -26,6 +26,7 @@ urlpatterns = [
     path('forum/', include('forum.urls')),
     path('articles/', include('articles.urls')),
     path('', include('website.urls')),
+    path('debug/', include('debug_toolbar.urls')),
 ]
 
 # включаем возможность обработки картинок

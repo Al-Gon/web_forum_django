@@ -3,7 +3,7 @@ from django.contrib.auth.views import LoginView
 from django.shortcuts import redirect
 from django.urls import reverse_lazy
 from django.views.generic import ListView, DetailView, CreateView, UpdateView
-from mechta.apps.utils import DataMixin, setup_session, delete_old_avatar_file, set_read_topic
+from mechta.apps.utils import DataMixin, delete_old_avatar_file, set_read_topic
 from django.db.models import Count, F, Q, Window
 from django.db.models.functions import Rank, DenseRank
 from .forms import *
@@ -81,6 +81,33 @@ class UserProfileUpdate(DataMixin, UpdateView):
             return redirect('forum:user_profile', user_slug=self.kwargs[self.slug_url_kwarg])
 
 
+# class TestUserProfile(DataMixin, DetailView):
+#     context_object_name = 'page'
+#     model = Profile
+#     template_name = 'shlak/test_user_profile.html'
+#     slug_url_kwarg = 'user_slug'
+#     slug_field = 'slug'
+#
+#     def get_queryset(self):
+#         qw = self.model.objects.select_related('user', 'land_plot', 'avatar'). \
+#             values('user__username', 'user__first_name',
+#                    'user__last_name', 'user__date_joined', 'land_plot__number', 'phone',
+#                    'last_visit', 'slug', 'avatar__image_url')
+#         return qw
+#
+#     def get_context_data(self, **kwargs):
+#         context = super().get_context_data(**kwargs)
+#         context = self.add_user_context(context=context)
+#         topics = User.objects.prefetch_related('topic_set', 'message_set').get(pk=1)
+#         context['num_topics'] = topics.topic_set.count()
+#         context['num_messages'] = topics.message_set.count()
+#         return context
+
+
+
+
+
+
 class UserProfile(DataMixin, DetailView):
     context_object_name = 'page'
     model = Profile
@@ -88,9 +115,9 @@ class UserProfile(DataMixin, DetailView):
     slug_url_kwarg = 'user_slug'
 
     def get_queryset(self):
-        qw = self.model.objects.filter(slug=self.kwargs[self.slug_url_kwarg]).\
+        qw = self.model.objects.select_related('user', 'land_plot', 'avatar').\
             annotate(num_messages=Count('user__message__id', distinct=True)).\
-            annotate(num_topics=Count('user__topic__id', distinct=True)).\
+            annotate(num_topics=Count('user__topic__id', distinct=True)). \
             values('user__username', 'user__first_name',
                    'user__last_name', 'user__date_joined',
                    'land_plot__number', 'phone', 'last_visit', 'slug', 'avatar__image_url',
@@ -99,9 +126,7 @@ class UserProfile(DataMixin, DetailView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context = self.add_user_context(context=context,
-                                        is_forum_page=True,
-                                        )
+        context = self.add_user_context(context=context)
         return context
 
 
@@ -124,12 +149,11 @@ class SearchResult(DataMixin, ListView):
         return qw
 
     def get_context_data(self, **kwargs):
-        setup_session(self.request)
         context = super().get_context_data(**kwargs)
         context['query'] = self.request.GET.get('f_q')
         context = self.add_user_context(context=context,
                                         is_forum_page=True,
-                                        request_path=self.request.path
+                                        request=self.request
                                         )
         return context
 
@@ -141,12 +165,11 @@ class CreateTopic(DataMixin, CreateView):
     form_class = CreateTopicForm
 
     def get_context_data(self, **kwargs):
-        setup_session(self.request)
         context = super().get_context_data(**kwargs)
         context = self.add_user_context(context=context,
                                         context_model='section',
                                         is_forum_page=True,
-                                        request_path=self.request.path,
+                                        request=self.request,
                                         id=self.kwargs['section_id'],
                                         values=['id', 'title', 'description',
                                                 'topic__title', 'topic__pub_date',
@@ -176,12 +199,11 @@ class ReplyPost(DataMixin, CreateView):
 
 
     def get_context_data(self, **kwargs):
-        setup_session(self.request)
         context = super().get_context_data(**kwargs)
         context = self.add_user_context(context=context,
                                         context_model='topic',
                                         is_forum_page=True,
-                                        request_path=self.request.path,
+                                        request=self.request,
                                         id=self.kwargs['topic_id'],
                                         values=['id', 'title', 'description',
                                                 'message__text', 'message__pub_date',
@@ -224,12 +246,10 @@ class ViewUnreadTopics(DataMixin, ListView):
         return qw2.union(qw1)
 
     def get_context_data(self, **kwargs):
-        setup_session(self.request)
         context = super().get_context_data(**kwargs)
         context = self.add_user_context(context=context,
                                         is_forum_page=True,
-                                        request_path=self.request.path,
-                                        user=self.request.user
+                                        request=self.request
                                         )
         return context
 
@@ -242,7 +262,6 @@ class ViewTopic(DataMixin, ListView):
 
     def get_queryset(self):
         qw = self.model.objects. \
-            filter(topic_id=self.kwargs[self.pk_url_kwarg]). \
             select_related('topic_id', 'user_id', 'user_id__profile'). \
             order_by('pub_date'). \
             values('id', 'text', 'pub_date',
@@ -252,12 +271,12 @@ class ViewTopic(DataMixin, ListView):
         return qw
 
     def get_context_data(self, **kwargs):
-        setup_session(self.request, self.kwargs[self.pk_url_kwarg])
+        set_read_topic(self.request.user, self.kwargs[self.pk_url_kwarg])
         context = super().get_context_data(**kwargs)
         context = self.add_user_context(context=context,
                                         context_model='topic',
                                         is_forum_page=True,
-                                        request_path=self.request.path,
+                                        request=self.request,
                                         id=self.kwargs[self.pk_url_kwarg],
                                         values=['title', 'description',
                                                 'section_id__id', 'section_id__title', 'section_id__icon'])
@@ -272,7 +291,6 @@ class ViewSection(DataMixin, ListView):
 
     def get_queryset(self):
         qw = self.model.objects.\
-            filter(section_id=self.kwargs[self.pk_url_kwarg]).\
             select_related('section_id').\
             annotate(num_messages=Count('message')). \
             order_by('pub_date'). \
@@ -283,12 +301,11 @@ class ViewSection(DataMixin, ListView):
         return qw
 
     def get_context_data(self, **kwargs):
-        setup_session(self.request)
         context = super().get_context_data(**kwargs)
         context = self.add_user_context(context=context,
                                         context_model='section',
                                         is_forum_page=True,
-                                        request_path=self.request.path,
+                                        request=self.request,
                                         id=self.kwargs[self.pk_url_kwarg],
                                         values=['title', 'description', 'icon'])
         return context
@@ -321,12 +338,11 @@ class ViewPage(DataMixin, ListView):
         return qw
 
     def get_context_data(self, **kwargs):
-        setup_session(self.request)
         context = super().get_context_data(**kwargs)
         context = self.add_user_context(context=context,
-                                        request_path=self.request.path,
-                                        is_forum_page=True,
-                                        user=self.request.user)
+                                        request=self.request,
+                                        is_forum_page=True
+                                        )
         return context
 
 

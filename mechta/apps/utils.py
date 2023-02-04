@@ -51,12 +51,12 @@ class DataMixin:
     def get_last_messages():
         return Message.objects.\
             values('user_id__username',
-                   'user_id__profile__land_plot',
+                   'user_id__profile__land_plot__number',
                    'topic_id__title',
                    'topic_id__id',
                    'topic_id__section_id__id',
                    'pub_date').\
-            order_by('-pub_date')
+            order_by('-pub_date')[:3]
 
     @staticmethod
     def get_count_topics():
@@ -77,75 +77,43 @@ class DataMixin:
         now = timezone.now()
         return ForumSession.objects.filter(last_visit__gt=(now - time_delta)).count()
 
+
     @staticmethod
     def get_total_users():
         return User.objects.count()
 
     @staticmethod
-    def get_total_visited(request_path):
-        qw = ForumPagesCounter.objects.filter(page_url=request_path).values('visited')
-        return qw[0] if qw else {'visited': 0}
-
-    def add_user_context(self, context, context_model=None, is_forum_page=False,
-                         request_path=None, user=None,  **kwargs):
-
-        context['menu_items'] = self.get_menu_items()
-        context['last_messages'] = self.get_last_messages()
-
-        if context_model is not None:
-            context[context_model] = self.get_context_model_content(context_model, **kwargs)
-        if is_forum_page:
-            context['topics_numbers'] = self.get_count_topics()
-            context['messages_numbers'] = self.get_count_messages()
-            context['count_users'] = self.get_count_users()
-            context['total_users'] = self.get_total_users()
-            if request_path is not None:
-                context['total_visited'] = self.get_total_visited(request_path)
-            if user is not None and user.is_authenticated:
-                context['total_messages_after_last_visit'] = self.get_count_messages_after_last_visit(user)
-        return context
-
-
-def set_read_topic(user, topic_id):
-    topic = Topic.objects.get(pk=topic_id)
-    _, _ = ForumReadTopic.objects.update_or_create(user=user, topic=topic, defaults={'last_view': timezone.now()})
-
-
-
-def setup_session(request, topic_id=None):
-    if request.path.count('forum/'):
+    def setup_session(request, user):
+        now = timezone.now()
         page_url = request.path
+        try:
+            forum_session = ForumSession.objects.get(session_key=request.session.session_key)
+            if page_url not in forum_session.pages_dict:
+                forum_session.pages_dict[page_url] = '1'
+            else:
+                num = int(forum_session.pages_dict[page_url]) + 1
+                forum_session.pages_dict[page_url] = str(num)
+            forum_session.last_visit = now
+            forum_session.user_id = user
+            forum_session.save()
+        except ForumSession.DoesNotExist:
+            request.session.set_expiry(3600)  # Задаю нужное мне время жизни сессии
+            request.session.save()
+            ForumSession.objects.create(session_key=Session.objects.get(pk=request.session.session_key),
+                                        last_visit=now,
+                                        user_id=user,
+                                        expire_date=Session.objects.get(
+                                            pk=request.session.session_key).expire_date,
+                                        pages_dict={page_url: '1'})
 
-        if request.user.is_authenticated:
-            now = timezone.now()
-            user_id = request.user.id
-            user = User.objects.get(pk=user_id)
-            try:
-                forum_session = ForumSession.objects.get(session_key=request.session.session_key)
-                if page_url not in forum_session.pages_dict:
-                    forum_session.pages_dict[page_url] = '1'
-                else:
-                    num = int(forum_session.pages_dict[page_url]) + 1
-                    forum_session.pages_dict[page_url] = str(num)
-                forum_session.last_visit = now
-                forum_session.user_id = user
-                forum_session.save()
-            except ForumSession.DoesNotExist:
-                request.session.set_expiry(3600)  # Задаю нужное мне время жизни сессии
-                request.session.save()
-                ForumSession.objects.create(session_key=Session.objects.get(pk=request.session.session_key),
-                                            last_visit=now,
-                                            user_id=user,
-                                            expire_date=Session.objects.get(pk=request.session.session_key).expire_date,
-                                            pages_dict={page_url: '1'})
+            session = ForumSession.objects.get(session_key=request.session.session_key)
+            session.save()
 
 
-                session = ForumSession.objects.get(session_key=request.session.session_key)
-                session.save()
 
-            if topic_id is not None:
-                set_read_topic(user=user, topic_id=topic_id)
-
+    @staticmethod
+    def update_page_counter(request):
+        page_url = request.path
         try:
             forum_pages_counter = ForumPagesCounter.objects.get(page_url=page_url)
             forum_pages_counter.visited = (F('visited') + 1)
@@ -154,6 +122,39 @@ def setup_session(request, topic_id=None):
             ForumPagesCounter.objects.create(page_url=page_url, visited=1)
             forum_pages_counter = ForumPagesCounter.objects.get(page_url=page_url)
             forum_pages_counter.save()
+
+
+    @staticmethod
+    def get_total_visited(request_path):
+        qw = ForumPagesCounter.objects.filter(page_url=request_path).values('visited')
+        return qw[0] if qw else {'visited': 0}
+
+
+    def add_user_context(self, context, request=None, context_model=None, is_forum_page=False, **kwargs):
+
+
+        context['menu_items'] = self.get_menu_items()
+        context['last_messages'] = self.get_last_messages()
+
+        if context_model is not None:
+            context[context_model] = self.get_context_model_content(context_model, **kwargs)
+        if is_forum_page:
+            user = request.user
+            context['topics_numbers'] = self.get_count_topics()
+            context['messages_numbers'] = self.get_count_messages()
+            context['count_users'] = self.get_count_users()
+            context['total_users'] = self.get_total_users()
+            context['total_visited'] = self.get_total_visited(request.path)
+            if user is not None and user.is_authenticated:
+                context['total_messages_after_last_visit'] = self.get_count_messages_after_last_visit(user)
+                self.setup_session(request, user)
+            self.update_page_counter(request)
+        return context
+
+
+def set_read_topic(user, topic_id):
+    topic = Topic.objects.get(pk=topic_id)
+    _, _ = ForumReadTopic.objects.update_or_create(user=user, topic=topic, defaults={'last_view': timezone.now()})
 
 
 def delete_old_avatar_file(instance):
