@@ -57,12 +57,15 @@
                 <p> Написанно сообщений: {{ page.num_messages }}</p>
             </div>
         </div>
-        <div class="d-flex flex-row text-muted pt-0">
-            <div class="me-auto mb-3 mt-1 ">
-                <a class="btn btn-primary rounded-3" href="{% url 'forum:user_profile_update' page.slug %}"
-                   role="button">Редактировать профиль</a>
+
+        {% if request.user.username == page.user__username  %}
+            <div class="d-flex flex-row text-muted pt-0">
+                <div class="me-auto mb-3 mt-1 ">
+                    <a class="btn btn-primary rounded-3" href="{% url 'forum:user_profile_update' page.slug %}"
+                       role="button">Редактировать профиль</a>
+                </div>
             </div>
-        </div>
+        {% endif %}
     </div>
     {% else %}
         {% include 'forum/suggestion_to_register.html' %}

@@ -1,0 +1,92 @@
+{% extends "main.html" %}
+
+{% block title %} Форум {% endblock %}
+
+{% block second_page_link %}
+     <li class="breadcrumb-item">
+        <a href="{% url 'forum:page' %}">Форум</a>
+    </li>
+
+    <li class="breadcrumb-item active" aria-current="page">
+        Пользователи
+    </li>
+
+{% endblock %}
+
+{% block content_title %}
+
+    <h2 class="pb-2 border-bottom">
+        Форум
+    </h2>
+
+{% endblock %}
+
+{% block content %}
+
+<div class="row row-cols-1  align-items-md-center g-8 py-8">
+    {% if request.user.is_authenticated %}
+    {% include "forum/register_panel.html" %}
+
+    <div class=" my-3 p-3 bg-body rounded shadow-sm">
+        <div class="row border-bottom">
+            <div class="d-flex col-3 text-muted pt-3 justify-content-center">
+                <h6 class=" pb-2 mb-0">Пользователь</h6>
+            </div>
+            <div class="d-flex col-1 text-muted pt-3 justify-content-center">
+                <h6 class="pb-2 mb-0">Права</h6>
+            </div>
+            <div class="d-flex col-5 text-muted pt-3 justify-content-center">
+                <h6 class="pb-2 mb-0">Кол-во сообщений</h6>
+            </div>
+            <div class="d-flex col-3 text-muted pt-3 justify-content-center">
+                <h6 class="pb-2 mb-0">Последний визит</h6>
+            </div>
+        </div>
+
+
+
+        {% for item in page %}
+            <div class="row border-bottom">
+                <div class="d-flex col-3 justify-content-start">
+                    <div class="p-1">
+                    {% if item.profile__avatar__image_url %}
+                        <img class="avatar" src="{{ MEDIA_URL }}{{ item.profile__avatar__image_url }}"/>
+                    {% else %}
+                        <span class="avatar bg-secondary rounded-3" style="font-size:16px">
+                            {{ item.username|slice:2|upper }}
+                        </span>
+                    {% endif %}
+                    </div>
+                    <div class="pt-3">
+                        <a class="nav-link" href="{% url 'forum:user_profile' item.profile__slug  %}">
+                            <p class="pb-3 mb-0 small lh-sm" >
+                                {{ item.username }}, ( участок {{ item.profile__land_plot__number }})<br>
+                            </p>
+                        </a>
+                    </div>
+                </div>
+                <div class="d-flex col-1 text-muted pt-3 justify-content-center">
+                    <p class="pb-3 mb-0 small lh-sm">
+                        {{ item.is_member }}
+                    </p>
+                </div>
+                <div class="d-flex col-5 text-muted pt-3 justify-content-center">
+                    <p class="pb-3 mb-0 small lh-sm">
+                        {{ item.num_messages }}
+                    </p>
+                </div>
+                <div class="d-flex col-3 text-muted pt-3 justify-content-center">
+                    <p class="pb-3 mb-0 small lh-sm">
+                        {{ item.profile__last_visit }}
+                    </p>
+                </div>
+            </div>
+        {% endfor %}
+
+    </div>
+    {% else %}
+        {% include 'forum/suggestion_to_register.html' %}
+    {% endif %}
+</div>
+
+{% endblock %}

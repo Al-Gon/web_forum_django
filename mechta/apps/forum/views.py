@@ -4,7 +4,7 @@ from django.shortcuts import redirect
 from django.urls import reverse_lazy
 from django.views.generic import ListView, DetailView, CreateView, UpdateView
 from mechta.apps.utils import DataMixin, delete_old_avatar_file, set_read_topic
-from django.db.models import Count, F, Q, Window
+from django.db.models import Count, F, Q, Window, Case, Value, When
 from django.db.models.functions import Rank, DenseRank
 from .forms import *
 from .models import *
@@ -105,9 +105,6 @@ class UserProfileUpdate(DataMixin, UpdateView):
 
 
 
-
-
-
 class UserProfile(DataMixin, DetailView):
     context_object_name = 'page'
     model = Profile
@@ -191,7 +188,7 @@ class CreateTopic(DataMixin, CreateView):
         return redirect('forum:section', self.kwargs['section_id'])
 
 
-class ReplyPost(DataMixin, CreateView):
+class CreateMessage(DataMixin, CreateView):
     context_object_name = 'page'
     model = Message
     template_name = 'forum/reply_post.html'
@@ -344,6 +341,36 @@ class ViewPage(DataMixin, ListView):
                                         is_forum_page=True
                                         )
         return context
+
+
+class ViewMembers(DataMixin, ListView):
+    model = User
+    template_name = 'forum/content/members_page.html'
+    context_object_name = 'page'
+
+    def get_queryset(self):
+        gr = Group.objects.prefetch_related('user_set').get(name='forum_members')
+        members = gr.user_set.all().values_list('id', flat=True)
+
+        qw = self.model.objects.\
+            select_related('message', 'profile', 'profile__land_plot', 'profile__avatar'). \
+            annotate(is_member=Case(When(id__in=members, then=Value('пользователь')), default=Value('администратор'))).\
+            annotate(num_messages=Count('message__id')). \
+            order_by('date_joined'). \
+            values('username', 'profile__last_visit', 'profile__slug',
+                   'profile__land_plot__number', 'profile__avatar__image_url',
+                   'num_messages', 'is_member')
+        return qw
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context = self.add_user_context(context=context,
+                                        request=self.request,
+                                        is_forum_page=True
+                                        )
+        return context
+
+
 
 
 class RegisterUser(DataMixin, CreateView):
