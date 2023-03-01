@@ -40,6 +40,8 @@ class Profile(models.Model):
     avatar = models.ForeignKey(Avatar, on_delete=models.CASCADE, null=True)
     phone = models.CharField('телефон', max_length=20, blank=True)
     last_visit = models.DateTimeField('последнее посещение', default=timezone.now)
+    email_confirmed = models.BooleanField(default=False)
+    reset_password = models.BooleanField(default=False)
 
 
     def save(self, *args, **kwargs):

@@ -1,0 +1,43 @@
+{% extends 'main.html' %}
+
+{% block title %} Страница авторизации {% endblock %}
+
+{% block second_page_link %}
+
+    <li class="breadcrumb-item">
+        <a href="{% url 'forum:page' %}">Форум</a>
+    </li>
+    <li class="breadcrumb-item active" aria-current="page">
+        Страница активации акаунта
+    </li>
+
+{% endblock %}
+
+
+{% block content_title %}
+
+    <h2 class="pb-2 border-bottom">
+        Страница активации акаунта
+    </h2>
+
+{% endblock %}
+
+{% block content %}
+
+<div class="container-fluid col-4 text-muted">
+    {{ message|safe }}
+</div>
+
+<script type="text/javascript">
+    {% autoescape off %}
+    $(document).ready(function(){
+        {% if request.user.is_authenticated %}
+            setTimeout(function() { window.location.href = '{% url 'forum:page' %}';}, 3 * 1000);
+        {% else %}
+            setTimeout(function() { window.location.href = '{% url 'forum:register' %}';}, 3 * 1000);
+        {% endif %}
+    });
+    {% endautoescape %}
+</script>
+
+{% endblock %}

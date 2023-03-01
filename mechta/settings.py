@@ -170,3 +170,16 @@ MEDIA_URL = '/media/'
 # ]
 # print SQL queries in shell_plus
 SHELL_PLUS_PRINT_SQL = True
+######################################################
+
+# почты для получения писем
+RECIPIENTS_EMAIL = ['al0402ex@yandex.ru']
+# почта отправителя по умолчанию, та что верифицирована
+DEFAULT_FROM_EMAIL = 'al0402ex@yandex.ru'
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.yandex.ru'
+EMAIL_HOST_USER = 'al0402ex@yandex.ru'
+EMAIL_USE_SSL = True
+# ваш уникальный апи-ключ с сайта sendgrid
+EMAIL_HOST_PASSWORD = 'ubmsryfanumrhyli'
+EMAIL_PORT = 465

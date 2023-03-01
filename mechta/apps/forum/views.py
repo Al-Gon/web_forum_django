@@ -2,7 +2,9 @@ from django.contrib.auth import logout, login
 from django.contrib.auth.views import LoginView
 from django.shortcuts import redirect
 from django.urls import reverse_lazy
-from django.views.generic import ListView, DetailView, CreateView, UpdateView
+from django.views.generic import ListView, DetailView, CreateView, UpdateView, TemplateView
+from django.contrib.auth.views import PasswordResetView, PasswordResetDoneView, \
+    PasswordResetConfirmView, PasswordResetCompleteView
 from mechta.apps.utils import DataMixin, delete_old_avatar_file, set_read_topic
 from django.db.models import Count, F, Q, Window, Case, Value, When
 from django.db.models.functions import Rank, DenseRank
@@ -12,6 +14,15 @@ from django.views.decorators.csrf import csrf_exempt
 from django.http import JsonResponse
 from django.db.models import Subquery
 from django.contrib.auth.models import Group
+from django.contrib.sites.shortcuts import get_current_site
+from django.template.loader import render_to_string
+from django.conf import settings
+from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
+from django.utils.encoding import force_bytes, force_text
+from mechta.tokens import account_activation_token
+from django.http import HttpResponse
+from django.core.mail import send_mail
+from django.utils.translation import gettext_lazy as _
 
 
 
@@ -260,6 +271,7 @@ class ViewTopic(DataMixin, ListView):
     def get_queryset(self):
         qw = self.model.objects. \
             select_related('topic_id', 'user_id', 'user_id__profile'). \
+            filter(topic_id=self.kwargs['topic_id']). \
             order_by('pub_date'). \
             values('id', 'text', 'pub_date',
                    'topic_id', 'user_id__username',
@@ -289,6 +301,7 @@ class ViewSection(DataMixin, ListView):
     def get_queryset(self):
         qw = self.model.objects.\
             select_related('section_id').\
+            filter(section_id=self.kwargs['section_id']).\
             annotate(num_messages=Count('message')). \
             order_by('pub_date'). \
             values('id', 'title', 'description', 'pub_date',
@@ -371,12 +384,10 @@ class ViewMembers(DataMixin, ListView):
         return context
 
 
-
-
 class RegisterUser(DataMixin, CreateView):
     form_class = UserForm
-    template_name = 'forum/register_page.html'
-    success_url = reverse_lazy('login')
+    template_name = 'forum/registration/register_page.html'
+    success_url = reverse_lazy('forum:login')
     context_object_name = 'page'
     pro_form = ProfileForm
 
@@ -389,18 +400,126 @@ class RegisterUser(DataMixin, CreateView):
     def form_valid(self, form):
         pro_form_ = self.pro_form(self.request.POST)
         if pro_form_.is_valid():
+            site = get_current_site(self.request)
             user = form.save()
             forum_members = Group.objects.get(name='forum_members')
             user.groups.add(forum_members)
+            user.is_active = False
+            user.save()
+
             pro_form_.add_user_pk(user.pk)
             pro_form_.save()
-            login(self.request, user)
+
+            message = render_to_string('forum/registration/activation_email.html', {
+                'username': user.username,
+                'protocol': 'http',
+                'domain': site.domain,
+                'uid': urlsafe_base64_encode(force_bytes(user.pk)),
+                'token': account_activation_token.make_token(user),
+            })
+            a = send_mail(subject=f'Подтверждение регистрации на сайте {site.domain}',
+                            message=message,
+                            from_email=settings.EMAIL_HOST_USER,
+                            recipient_list=[user.email],
+                            fail_silently=False,
+                            html_message=message)
             return redirect('forum:page')
+
+
+# def activate(request, uidb64, token):
+#     try:
+#         uid = force_text(urlsafe_base64_decode(uidb64))
+#         user = User.objects.get(pk=uid)
+#     except(TypeError, ValueError, OverflowError, User.DoesNotExist):
+#         user = None
+#     context
+#     if user is not None and account_activation_token.check_token(user, token):
+#         user.is_active = True
+#         user.save()
+#         context = {'message': 'Thank you for your email confirmation. Now you can login your account.'}
+#
+#         # return HttpResponse('Thank you for your email confirmation. Now you can login your account.')
+#     else:
+#         context = {'message': 'Activation link is invalid!'}
+#         # return HttpResponse('Activation link is invalid!')
+#     return render(request, 'forum/registration/activation_page.html', context=context)
+
+
+class ActivateUser(DataMixin, TemplateView):
+    context_object_name = 'page'
+    template_name = 'forum/registration/activation_page.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context = self.add_user_context(context=context)
+        token = self.kwargs['token']
+        uidb64 = self.kwargs['uidb64']
+        try:
+            uid = force_text(urlsafe_base64_decode(uidb64))
+            user = User.objects.get(pk=uid)
+        except(TypeError, ValueError, OverflowError, User.DoesNotExist):
+            user = None
+        if user is not None and account_activation_token.check_token(user, token):
+            user.is_active = True
+            # user.profile.email_confirmed = True
+            user.save()
+            login(self.request, user)
+            context['message'] = '<p>Ваш аккаунт был подтверждён успешно.</p>' \
+                                 '<p>Вы будите перенаправлены на главную страницу форума.</p>'
+        else:
+            context['message'] = '<p>Ссылка для активации аккаунта устарела.</p><p>Пройдите регистрацию заново!</p>'
+        return context
+
+
+class PasswordReset(DataMixin, PasswordResetView):
+    context_object_name = 'page'
+    template_name = 'forum/registration/password_reset_page.html'
+    form_class = UserForgotPasswordForm
+    email_template_name = 'forum/registration/password_reset_email.html'
+    html_email_template_name = 'forum/registration/password_reset_email.html'
+    success_url = reverse_lazy('forum:password_reset_done')
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context = self.add_user_context(context=context)
+        return context
+
+
+class PasswordResetDone(DataMixin, PasswordResetDoneView):
+    context_object_name = 'page'
+    template_name = 'forum/registration/password_reset_done_page.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context = self.add_user_context(context=context)
+        return context
+
+
+class PasswordResetConfirm(DataMixin, PasswordResetConfirmView):
+    context_object_name = 'page'
+    template_name = 'forum/registration/password_reset_confirm_page.html'
+    form_class = UserPasswordResetForm
+    success_url = reverse_lazy("forum:password_reset_complete")
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context = self.add_user_context(context=context)
+        return context
+
+
+class PasswordResetComplete(DataMixin, PasswordResetCompleteView):
+    context_object_name = 'page'
+    template_name = 'forum/registration/password_reset_complete_page.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context = self.add_user_context(context=context)
+        return context
 
 
 class LoginUser(DataMixin, LoginView):
     form_class = LoginUserForm
-    template_name = 'forum/login_page.html'
+    template_name = 'forum/registration/login_page.html'
     context_object_name = 'page'
 
     def get_context_data(self, **kwargs):

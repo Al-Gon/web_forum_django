@@ -130,7 +130,7 @@ class ViewsTest(TestCase):
     def test_register_form(self):
         post_data = {
             'username': self.username,
-            'email': self.email,
+            'email': 'al0402ex@yandex.ru',
             'password1': self.password,
             'password2': self.password,
             'phone': self.phone,

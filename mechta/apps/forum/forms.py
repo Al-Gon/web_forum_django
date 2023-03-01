@@ -1,8 +1,43 @@
 from django import forms
 from .models import *
 from django.contrib.auth.models import User
-from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
+from django.contrib.auth.forms import UserCreationForm, AuthenticationForm, SetPasswordForm, PasswordResetForm
 from mechta.utils.image_widget import ImageWidget
+
+class UserPasswordResetForm(SetPasswordForm):
+    """Change password form."""
+    new_password1 = forms.CharField(label='Новый пароль',
+                                    help_text="<ul class='errorlist text-muted'><li>Your password can 't be too similar to your other personal information.</li><li>Your password must contain at least 8 characters.</li><li>Your password can 't be a commonly used password.</li> <li>Your password can 't be entirely numeric.<li></ul>",
+                                    max_length=100,
+                                    required=True,
+                                    widget=forms.PasswordInput(attrs={
+                                                                        'class': 'form-control',
+                                                                        'type': 'password',
+                                                                        'id': 'user_password',
+                                    }))
+
+    new_password2 = forms.CharField(label='Введите новый пароль повторно',
+                                    help_text=False,
+                                    max_length=100,
+                                    required=True,
+                                    widget=forms.PasswordInput(
+                                                                attrs={
+                                                                    'class': 'form-control',
+                                                                    'type': 'password',
+                                                                    'id': 'user_password',
+                                                                        }
+                                    ))
+
+
+class UserForgotPasswordForm(PasswordResetForm):
+    """User forgot password, check via email form."""
+    email = forms.EmailField(label='Email',
+                             widget=forms.EmailInput(attrs={'class': 'form-control'}))
+
+    # class Meta:
+    #     model = User
+    #     fields = ('email',)
+
 
 
 class UserForm(UserCreationForm):
@@ -29,6 +64,7 @@ class ProfileForm(forms.ModelForm):
     class Meta(UserCreationForm):
         model = Profile
         fields = ('phone', 'land_plot')
+        labels = {'land_plot': 'Номер участка'}
         widgets = {
                     'phone': forms.TextInput(attrs={'class': 'form-control'}),
                     'land_plot': forms.Select(attrs={'class': 'form-select'})
