@@ -44,20 +44,7 @@
             </div>
         {% endfor %}
         <div class="form-error">{{ form.non_field_errors }}</div>
-        {% for field in form %}
-            <div class="row mb-3 align-items-center g-2">
-                <label class="col-sm-2 col-form-label" for="{{ field.id_for_label }}">
-                    {{ field.label }}:
-                </label>
-                <div class="col-sm-10">
-                    {{ field }}
-                </div>
-                <div class="form-error">
-                    {{ field.errors }}
-                </div>
-            </div>
-        {% endfor %}
-        {% for field in land_plot_form %}
+        {% for field in profile_form %}
             <div class="row mb-3 align-items-center g-2">
                 <label class="col-sm-2 col-form-label" for="{{ field.id_for_label }}">
                     {{ field.label }}:
@@ -83,7 +70,6 @@
                 {{ field.errors }}
             </div>
         {% endfor %}
-
 
         <button class="btn btn-lg btn-primary rounded-3" type="submit">Сохранить изменения</button>
     </form>

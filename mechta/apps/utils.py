@@ -155,15 +155,3 @@ class DataMixin:
 def set_read_topic(user, topic_id):
     topic = Topic.objects.get(pk=topic_id)
     _, _ = ForumReadTopic.objects.update_or_create(user=user, topic=topic, defaults={'last_view': timezone.now()})
-
-
-def delete_old_avatar_file(instance):
-
-    old_avatar = Avatar.objects.filter(pk=instance.pk)[0]
-    if old_avatar.image != instance.image and old_avatar.image_url:
-        # old_avatar.image.delete(save=True)
-        file_path = os.path.join(settings.MEDIA_ROOT, old_avatar.image_url)
-        try:
-            os.remove(file_path)
-        except OSError as e:
-            print("Error: %s : %s" % (file_path, e.strerror))

@@ -1,8 +1,23 @@
+# Core Django imports.
 from django import forms
-from .models import *
+from forum.models import *
 from django.contrib.auth.models import User
 from django.contrib.auth.forms import UserCreationForm, AuthenticationForm, SetPasswordForm, PasswordResetForm
 from mechta.utils.image_widget import ImageWidget
+from email_validate import validate
+
+
+def validate_email(value):
+    if not validate(email_address=value,
+                    check_format=True,
+                    check_blacklist=True,
+                    check_dns=True,
+                    dns_timeout=10,
+                    check_smtp=True,
+                    smtp_debug=False):
+
+        raise forms.ValidationError("Введите действительно существующий email адрес.")
+
 
 class UserPasswordResetForm(SetPasswordForm):
     """Change password form."""
@@ -34,20 +49,20 @@ class UserForgotPasswordForm(PasswordResetForm):
     email = forms.EmailField(label='Email',
                              widget=forms.EmailInput(attrs={'class': 'form-control'}))
 
-    # class Meta:
-    #     model = User
-    #     fields = ('email',)
-
-
 
 class UserForm(UserCreationForm):
     username = forms.CharField(label='Логин',
+                               required=True,
                                widget=forms.TextInput(attrs={'class': 'form-control'}))
     email = forms.EmailField(label='Email',
+                             required=True,
+                             validators=[validate_email],
                              widget=forms.EmailInput(attrs={'class': 'form-control'}))
     password1 = forms.CharField(label='Пароль',
+                                required=True,
                                 widget=forms.PasswordInput(attrs={'class': 'form-control'}))
     password2 = forms.CharField(label='Повтор пароля',
+                                required=True,
                                 widget=forms.PasswordInput(attrs={'class': 'form-control'}))
 
     class Meta:
@@ -83,6 +98,7 @@ class UserUpdateForm(forms.ModelForm):
     last_name = forms.CharField(label='Фамилия',
                                 widget=forms.TextInput(attrs={'class': 'form-control'}))
     email = forms.EmailField(label='Email',
+                             validators=[validate_email],
                              widget=forms.EmailInput(attrs={'class': 'form-control'}))
 
     class Meta:
@@ -116,35 +132,3 @@ class LoginUserForm(AuthenticationForm):
                                widget=forms.TextInput(attrs={'class': 'form-control'}))
     password = forms.CharField(label='Пароль',
                                widget=forms.PasswordInput(attrs={'class': 'form-control'}))
-
-
-class ReplyPostForm(forms.ModelForm):
-    text = forms.CharField(label='Сообщение',
-                           widget=forms.Textarea(attrs={'class': 'form-control','rows': 10, 'cols': 5}))
-
-    class Meta(UserCreationForm):
-        model = Message
-        fields = ('text',)
-
-    def add_user_id(self, id_):
-        self.instance.user_id = id_
-
-    def add_topic_id(self, id_):
-        self.instance.topic_id = id_
-
-
-class CreateTopicForm(forms.ModelForm):
-    title = forms.CharField(label='Название темы',
-                            widget=forms.Textarea(attrs={'class': 'form-control', 'rows': 3, 'cols': 10}))
-    description = forms.CharField(label='Описание темы',
-                                  widget=forms.Textarea(attrs={'class': 'form-control', 'rows': 3, 'cols': 5}))
-
-    class Meta(UserCreationForm):
-        model = Topic
-        fields = ('title', 'description',)
-
-    def add_user_id(self, id_):
-        self.instance.user_id = id_
-
-    def add_section_id(self, id_):
-        self.instance.section_id = id_

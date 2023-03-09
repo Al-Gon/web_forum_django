@@ -60,7 +60,7 @@ class ViewsTest(TestCase):
                                 last_name=test_value_user__last_name_)
             user_ = User.objects.get(pk=i)
 
-            Profile.objects.create(user=user_, land_plot=land_plot_, phone=test_value_phone_)
+            Profile.objects.update(user=user_, land_plot=land_plot_, phone=test_value_phone_)
 
         max_section_id_settings = max(map(lambda x: x['max_section_id'], cls.test_settings))
         for i in range(1, max_section_id_settings + 1):

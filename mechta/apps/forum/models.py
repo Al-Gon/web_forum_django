@@ -6,7 +6,6 @@ from functools import reduce
 from mechta.utils.ascii_filesystem_storage import ASCIIFileSystemStorage
 
 
-
 class LandPlot(models.Model):
     NUMBERS = list(map(lambda x: (str(x), str(x)), range(1, 300)))
     number = models.CharField('номер участка', choices=NUMBERS, max_length=3, unique=True)
@@ -21,7 +20,10 @@ class Avatar(models.Model):
     def get_image_url(self):
         try:
             if self.image.name:
-                url = self.image.storage.get_pre_name(self.image.field.upload_to + self.image.name)
+                if self.image.field.upload_to not in self.image.name:
+                    url = self.image.storage.get_pre_name(self.image.field.upload_to + self.image.name)
+                else:
+                    url = self.image_url
             else:
                 raise ValueError
         except ValueError:
@@ -36,7 +38,7 @@ class Avatar(models.Model):
 class Profile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE,)
     slug = models.SlugField('url', max_length=255, db_index=True, unique=True)
-    land_plot = models.ForeignKey(LandPlot, on_delete=models.CASCADE)
+    land_plot = models.ForeignKey(LandPlot, on_delete=models.CASCADE, null=True)
     avatar = models.ForeignKey(Avatar, on_delete=models.CASCADE, null=True)
     phone = models.CharField('телефон', max_length=20, blank=True)
     last_visit = models.DateTimeField('последнее посещение', default=timezone.now)

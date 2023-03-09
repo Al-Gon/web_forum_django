@@ -22,7 +22,7 @@
 
 <div class="row row-cols-1  align-items-md-center g-8 py-8">
 
-    {% include "forum/register_panel.html" %}
+    {% include "forum/user_profile/register_panel.html" %}
 
     <div class=" my-3 px-4 py-2 bg-body rounded shadow-sm">
         <div class="row border-bottom">
@@ -104,10 +104,10 @@
         {% endfor %}
 
         {% if request.user.is_authenticated %}
-            {% include "forum/filter_panel.html" %}
+            {% include "forum/content/stuff/filter_panel.html" %}
         {% endif %}
 
-        {% include "forum/statistic_panel.html" %}
+        {% include "forum/content/stuff/statistic_panel.html" %}
 
     </div>
 </div>

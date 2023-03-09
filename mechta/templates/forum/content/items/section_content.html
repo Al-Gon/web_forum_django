@@ -38,7 +38,7 @@
 
 <div class="row row-cols-1  align-items-md-center g-8 py-8">
 
-    {% include "forum/register_panel.html" %}
+    {% include "forum/user_profile/register_panel.html" %}
 
     <div class=" my-3 p-3 bg-body rounded shadow-sm">
 
@@ -118,11 +118,11 @@
 
 
 
-        {% include "forum/statistic_panel.html" %}
+        {% include "forum/content/stuff/statistic_panel.html" %}
 
     {% else %}
 
-        {% include 'forum/suggestion_to_register.html' %}
+        {% include 'forum/content/stuff/suggestion_to_register.html' %}
 
     {% endif %}
 

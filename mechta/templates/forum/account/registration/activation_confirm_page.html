@@ -1,0 +1,37 @@
+{% extends 'main.html' %}
+
+{% block title %} Подтверждение регистрации {% endblock %}
+
+{% block second_page_link %}
+
+    <li class="breadcrumb-item">
+        <a href="{% url 'forum:page' %}">Форум</a>
+    </li>
+    <li class="breadcrumb-item active" aria-current="page">
+        Подтверждение регистрации
+    </li>
+
+{% endblock %}
+
+
+{% block content_title %}
+
+    <h2 class="pb-2 border-bottom">
+        Подтверждение регистрации
+    </h2>
+
+{% endblock %}
+
+{% block content %}
+
+<div class="container-fluid col-6">
+
+    <p>
+        Привет {{ page.user.username }}!<br>
+        Вам на почту {{ page.user.email }} отправленно письмо для подтверждения регистрации. <br>
+        Следуйте инструкциям указанным в письме.<br>
+    </p>
+
+</div>
+
+{% endblock %}
