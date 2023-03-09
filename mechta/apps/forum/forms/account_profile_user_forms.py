@@ -7,7 +7,13 @@ from mechta.utils.image_widget import ImageWidget
 from email_validate import validate
 
 
-def validate_email(value):
+def validate_email(value: str):
+    """
+    Returns forms.ValidationError if email address is not exist.
+    :param value: email address
+    :return: forms.ValidationError
+    """
+
     if not validate(email_address=value,
                     check_format=True,
                     check_blacklist=True,
@@ -20,16 +26,20 @@ def validate_email(value):
 
 
 class UserPasswordResetForm(SetPasswordForm):
-    """Change password form."""
+    """
+    Change password form.
+    """
+
     new_password1 = forms.CharField(label='Новый пароль',
-                                    help_text="<ul class='errorlist text-muted'><li>Your password can 't be too similar to your other personal information.</li><li>Your password must contain at least 8 characters.</li><li>Your password can 't be a commonly used password.</li> <li>Your password can 't be entirely numeric.<li></ul>",
                                     max_length=100,
                                     required=True,
                                     widget=forms.PasswordInput(attrs={
-                                                                        'class': 'form-control',
-                                                                        'type': 'password',
-                                                                        'id': 'user_password',
-                                    }))
+                                                                      'class': 'form-control',
+                                                                      'type': 'password',
+                                                                      'id': 'user_password',
+                                                                    }
+                                                               )
+                                    )
 
     new_password2 = forms.CharField(label='Введите новый пароль повторно',
                                     help_text=False,
@@ -40,17 +50,25 @@ class UserPasswordResetForm(SetPasswordForm):
                                                                     'class': 'form-control',
                                                                     'type': 'password',
                                                                     'id': 'user_password',
-                                                                        }
-                                    ))
+                                                                    }
+                                                                )
+                                    )
 
 
 class UserForgotPasswordForm(PasswordResetForm):
-    """User forgot password, check via email form."""
+    """
+    User forgot password, check via email form.
+    """
+
     email = forms.EmailField(label='Email',
                              widget=forms.EmailInput(attrs={'class': 'form-control'}))
 
 
 class UserForm(UserCreationForm):
+    """
+    User registration form for signing up.
+    """
+
     username = forms.CharField(label='Логин',
                                required=True,
                                widget=forms.TextInput(attrs={'class': 'form-control'}))
@@ -71,6 +89,9 @@ class UserForm(UserCreationForm):
 
 
 class ProfileForm(forms.ModelForm):
+    """
+    User Profile registration form for signing up.
+    """
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -90,6 +111,10 @@ class ProfileForm(forms.ModelForm):
 
 
 class UserUpdateForm(forms.ModelForm):
+    """
+    User update form for update user data.
+    """
+
     username = forms.CharField(label='Логин',
                                widget=forms.TextInput(attrs={'class': 'form-control'}),
                                disabled=True)
@@ -107,6 +132,10 @@ class UserUpdateForm(forms.ModelForm):
 
 
 class ProfileUpdateForm(forms.ModelForm):
+    """
+    User profile update form for update user profile data.
+    """
+
     phone = forms.CharField(label='Телефон',
                             widget=forms.TextInput(attrs={'class': 'form-control'}))
 
@@ -118,6 +147,10 @@ class ProfileUpdateForm(forms.ModelForm):
 
 
 class AvatarUpdateForm(forms.ModelForm):
+    """
+    User avatar update form for update user avatar data.
+    """
+
     image = forms.ImageField(label='Аватар',
                              required=False,
                              widget=ImageWidget())
@@ -128,6 +161,10 @@ class AvatarUpdateForm(forms.ModelForm):
 
 
 class LoginUserForm(AuthenticationForm):
+    """
+    User login form.
+    """
+
     username = forms.CharField(label='Логин',
                                widget=forms.TextInput(attrs={'class': 'form-control'}))
     password = forms.CharField(label='Пароль',

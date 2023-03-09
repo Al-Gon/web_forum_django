@@ -1,7 +1,7 @@
 # Core Django imports.
 from django.views.generic import CreateView
 from mechta.apps.utils import DataMixin
-from django.shortcuts import redirect
+from django.shortcuts import redirect, get_object_or_404
 
 # Forum application imports.
 from forum.forms.create_item_forms import *
@@ -9,6 +9,10 @@ from forum.models import Message, Topic
 
 
 class CreateTopicView(DataMixin, CreateView):
+    """
+    Display page for creating a new topic.
+    """
+
     context_object_name = 'page'
     model = Topic
     template_name = 'forum/content/create_item/create_topic.html'
@@ -31,22 +35,23 @@ class CreateTopicView(DataMixin, CreateView):
         return context
 
     def form_valid(self, form):
-        section_id = self.kwargs['section_id']
-        section = Section.objects.get(id=section_id)
-        user = self.request.user
-        form.add_user_id(user)
-        form.add_section_id(section)
-        form.save()
+        topic = form.save(commit=False)
+        topic.section_id = get_object_or_404(Section, pk=self.kwargs.get('section_id'))
+        topic.user_id = self.request.user
+        topic.save()
 
         return redirect('forum:section', self.kwargs['section_id'])
 
 
 class CreateMessage(DataMixin, CreateView):
+    """
+    Display page for creating a new message.
+    """
+
     context_object_name = 'page'
     model = Message
     template_name = 'forum/content/create_item/reply_post.html'
-    form_class = ReplyPostForm
-
+    form_class = CreateMessageForm
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -67,11 +72,9 @@ class CreateMessage(DataMixin, CreateView):
         return context
 
     def form_valid(self, form):
-        topic_id = self.kwargs['topic_id']
-        topic = Topic.objects.get(id=topic_id)
-        user = self.request.user
-        form.add_user_id(user)
-        form.add_topic_id(topic)
-        form.save()
+        message = form.save(commit=False)
+        message.topic_id = get_object_or_404(Topic, pk=self.kwargs.get('topic_id'))
+        message.user_id = self.request.user
+        message.save()
 
         return redirect('forum:topic', self.kwargs['section_id'], self.kwargs['topic_id'])
