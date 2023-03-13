@@ -9,7 +9,7 @@
 {% block second_page_link %}
 
     <li class="breadcrumb-item">
-        <a href="{% url 'forum:page' %}">Форум</a>
+        <a href="{% url 'forum:home' %}">Форум</a>
     </li>
     {% for item in topic %}
 
@@ -62,7 +62,7 @@
             {% endfor %}
             <div class="flex w-30 text-muted align-self-center">
                 <div class="px-5">
-                    <a class="btn btn-primary rounded-3" href="{% url 'forum:reply' view.kwargs.section_id view.kwargs.topic_id %}"
+                    <a class="btn btn-primary rounded-3" href="{% url 'forum:create_message' view.kwargs.section_id view.kwargs.topic_id %}"
                        role="button">Написать сообщение</a>
                 </div>
             </div>

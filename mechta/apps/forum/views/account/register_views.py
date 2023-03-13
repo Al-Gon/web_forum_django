@@ -2,7 +2,7 @@
 from django.contrib.auth import login
 from django.shortcuts import redirect
 from django.urls import reverse_lazy
-from django.views.generic import DetailView, CreateView, TemplateView
+from django.views.generic import DetailView, CreateView, TemplateView, View
 from django.contrib.auth.views import PasswordResetView, PasswordResetDoneView, \
     PasswordResetConfirmView, PasswordResetCompleteView
 from django.contrib.auth.models import Group
@@ -10,6 +10,7 @@ from django.contrib.sites.shortcuts import get_current_site
 from django.template.loader import render_to_string
 from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
 from django.utils.encoding import force_bytes, force_text
+from django.shortcuts import render
 from django.core.mail import EmailMessage
 
 # Forum application imports.
@@ -19,29 +20,36 @@ from forum.models import Profile
 from mechta.tokens import account_activation_token
 
 
-
-class RegisterUser(DataMixin, CreateView):
-    form_class = UserForm
+class RegisterUser(DataMixin, View):
+    """
+    Registration of a new user.
+    """
+    context_object = {}
     template_name = 'forum/account/registration/register_page.html'
-    context_object_name = 'page'
-    pro_form = ProfileForm
 
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context = self.add_user_context(context=context)
-        context['pro_form'] = self.pro_form
-        return context
+    def get(self, request, **kwargs):
+        user_form = UserForm(data=request.POST)
+        profile_form = ProfileForm(data=request.POST)
 
-    def form_valid(self, form):
-        pro_form_ = self.pro_form(self.request.POST)
-        if pro_form_.is_valid():
-            user = form.save()
-            forum_members = Group.objects.get(name='forum_members')
-            user.groups.add(forum_members)
+        self.context_object = self.add_user_context(context=self.context_object)
+        self.context_object['user_form'] = user_form
+        self.context_object['profile_form'] = profile_form
+
+        return render(request, self.template_name, self.context_object)
+
+    def post(self, request, *args, **kwargs):
+        user_form = UserForm(data=request.POST)
+        profile_form = ProfileForm(data=request.POST)
+
+        if user_form.is_valid() and profile_form.is_valid():
+            user = user_form.save(commit=False)
             user.is_active = False
             user.save()
-            pro_form_.add_user_pk(user.pk)
-            pro_form_.save()
+            profile_form.instance.user_id = user.pk
+            profile_form.save()
+            forum_members = Group.objects.get(name='forum_members')
+            user.groups.add(forum_members)
+            user.save()
 
             site = get_current_site(self.request)
             mail_subject = f'Активация аккаунта на форуме сайта {site}.'
@@ -53,13 +61,21 @@ class RegisterUser(DataMixin, CreateView):
                 'uid': urlsafe_base64_encode(force_bytes(user.pk)),
                 'token': account_activation_token.make_token(user),
             })
+
             email = EmailMessage(mail_subject, message, to=[to_email])
+            email.content_subtype = 'html'
             email.send()
             return redirect(reverse_lazy('forum:activation_confirm',
                                          kwargs={'user_slug': user.profile.slug}))
 
-        else:
-            return redirect('forum:register')
+        user_form = UserForm(data=request.POST)
+        profile_form = ProfileForm(data=request.POST)
+
+        self.context_object = self.add_user_context(context=self.context_object)
+        self.context_object['user_form'] = user_form
+        self.context_object['profile_form'] = profile_form
+
+        return render(request, self.template_name, self.context_object)
 
 
 class ActivationConfirm(DataMixin, DetailView):

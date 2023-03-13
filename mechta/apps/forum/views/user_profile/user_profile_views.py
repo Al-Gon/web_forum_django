@@ -15,7 +15,7 @@ class UserProfile(DataMixin, DetailView):
     """
     context_object_name = 'page'
     model = Profile
-    template_name = 'forum/content/profile_content.html'
+    template_name = 'forum/user_profile/profile_content.html'
     slug_url_kwarg = 'user_slug'
 
     def get_queryset(self):
@@ -36,7 +36,7 @@ class UserProfile(DataMixin, DetailView):
 
 class UserProfileUpdate(DataMixin, View):
     """
-    Updates user profile details
+    Updates user profile details.
     """
     template_name = 'forum/user_profile/profile_update_page.html'
     context_object = {}

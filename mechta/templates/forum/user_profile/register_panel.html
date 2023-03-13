@@ -1,7 +1,7 @@
 <div class="d-flex container-fluid navbar-expand-lg navbar-light bg-light rounded shadow-sm p-2">
     {% if request.user.is_authenticated %}
         <div class="nav-item p-2">
-             <a class="nav-link" href="{% url 'forum:page' %}">Форум</a>
+             <a class="nav-link" href="{% url 'forum:home' %}">Форум</a>
         </div>
         <div class="nav-item p-2">
              <a class="nav-link" href="{% url 'forum:user_profile' user.profile.slug %}">Профиль</a>

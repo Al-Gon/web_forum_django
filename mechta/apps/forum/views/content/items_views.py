@@ -8,7 +8,7 @@ from django.db.models import Count, F, Window
 from forum.models import Message, Topic, Section
 
 
-class ViewPage(DataMixin, ListView):
+class ForumView(DataMixin, ListView):
     model = Section
     context_object_name = 'page'
     template_name = 'forum/content/items/forum_content.html'

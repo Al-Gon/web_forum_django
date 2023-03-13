@@ -50,7 +50,7 @@ class CreateMessage(DataMixin, CreateView):
 
     context_object_name = 'page'
     model = Message
-    template_name = 'forum/content/create_item/reply_post.html'
+    template_name = 'forum/content/create_item/create_message.html'
     form_class = CreateMessageForm
 
     def get_context_data(self, **kwargs):

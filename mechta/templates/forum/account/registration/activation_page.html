@@ -5,7 +5,7 @@
 {% block second_page_link %}
 
     <li class="breadcrumb-item">
-        <a href="{% url 'forum:page' %}">Форум</a>
+        <a href="{% url 'forum:home' %}">Форум</a>
     </li>
     <li class="breadcrumb-item active" aria-current="page">
         Страница активации акаунта
@@ -32,7 +32,7 @@
     {% autoescape off %}
     $(document).ready(function(){
         {% if request.user.is_authenticated %}
-            setTimeout(function() { window.location.href = '{% url 'forum:page' %}';}, 3 * 1000);
+            setTimeout(function() { window.location.href = '{% url 'forum:home' %}';}, 3 * 1000);
         {% else %}
             setTimeout(function() { window.location.href = '{% url 'forum:register' %}';}, 3 * 1000);
         {% endif %}

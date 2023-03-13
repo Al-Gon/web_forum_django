@@ -5,7 +5,7 @@
 {% block second_page_link %}
 
     <li class="breadcrumb-item">
-        <a href="{% url 'forum:page' %}">Форум</a>
+        <a href="{% url 'forum:home' %}">Форум</a>
     </li>
     <li class="breadcrumb-item active" aria-current="page">
         Страница регистрации
@@ -29,8 +29,8 @@
 
     <form action="{% url 'forum:register' %}" method="post" enctype="multipart/form-data">
         {% csrf_token %}
-        <div class="form-error">{{ form.non_field_errors }}</div>
-        {% for field in form %}
+        <div class="form-error">{{ user_form.non_field_errors }}</div>
+        {% for field in user_form %}
             <div class="row mb-3 align-items-center g-2">
                 <label class="col-sm-2 col-form-label" for="{{ field.id_for_label }}">
                     {{field.label}}:
@@ -43,8 +43,8 @@
                 </div>
             </div>
         {% endfor %}
-        <div class="form-error">{{ pro_form.non_field_errors }}</div>
-        {% for field in pro_form %}
+        <div class="form-error">{{ profile_form.non_field_errors }}</div>
+        {% for field in profile_form %}
             <div class="row mb-3 align-items-center g-2">
                 <label class="col-sm-2 col-form-label" for="{{ field.id_for_label }}">
                     {{field.label}}:

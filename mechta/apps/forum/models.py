@@ -102,9 +102,11 @@ class ForumSession(models.Model):
     last_visit = models.DateTimeField('последнее посещение', default=timezone.now)
     pages_dict = models.JSONField('посещение страниц', default=dict)
 
+
 class ForumPagesCounter(models.Model):
     page_url = models.CharField('url адрес страницы', max_length=100, blank=True)
     visited = models.IntegerField('количество посещений', default=0)
+
 
 class ForumReadTopic(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)

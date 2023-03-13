@@ -3,7 +3,7 @@ from django.urls import path
 
 # Forum application imports.
 from forum.views.content.items_views import (
-    ViewPage,
+    ForumView,
     SectionView,
     TopicView,
 )
@@ -54,8 +54,8 @@ urlpatterns = [
     # /
     path(
         route='',
-        view=ViewPage.as_view(),
-        name='page'
+        view=ForumView.as_view(),
+        name='home'
     ),
 
     # /section_id/
@@ -107,11 +107,11 @@ urlpatterns = [
         name='create_topic'
     ),
 
-    # /section_id/topic_id/reply/'
+    # /section_id/topic_id/create_message/'
     path(
-        route='<int:section_id>/<int:topic_id>/reply/',
+        route='<int:section_id>/<int:topic_id>/create_message/',
         view=CreateMessage.as_view(),
-        name='reply'
+        name='create_message'
     ),
 
     # Account

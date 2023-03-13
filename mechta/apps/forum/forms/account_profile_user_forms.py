@@ -106,9 +106,6 @@ class ProfileForm(forms.ModelForm):
                     'land_plot': forms.Select(attrs={'class': 'form-select'})
         }
 
-    def add_user_pk(self, pk):
-        self.instance.user_id = pk
-
 
 class UserUpdateForm(forms.ModelForm):
     """
