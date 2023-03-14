@@ -3,7 +3,7 @@ from django.db import models
 
 class SitePage(models.Model):
     slug = models.SlugField('url', max_length=255, db_index=True, unique=True, default='', blank=True)
-    alias = models.CharField('ссылка', max_length=20, default='', null=True, blank=True)
+    alias = models.CharField('ссылка', max_length=50, default='', null=True, blank=True)
     title = models.CharField('название', max_length=200, null=True, blank=True)
     intro_text = models.TextField('краткое содержание страницы', null=True, blank=True, default='')
     content = models.TextField('содержание страницы', null=True, blank=True, default='')

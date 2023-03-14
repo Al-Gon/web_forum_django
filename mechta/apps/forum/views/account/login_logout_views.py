@@ -20,7 +20,7 @@ class LoginUser(DataMixin, LoginView):
         return context
 
     def get_success_url(self):
-        return reverse_lazy('forum:page')
+        return reverse_lazy('forum:home')
 
 
 def logout_user(request):
